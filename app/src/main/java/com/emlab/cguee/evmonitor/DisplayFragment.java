@@ -10,6 +10,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -27,6 +30,7 @@ public class DisplayFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private ImageView batteryImage;
     private TextView speed,batteryPercent;
+    private GoogleMap googleMap;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -117,5 +121,7 @@ public class DisplayFragment extends Fragment {
         batteryImage = (ImageView)getView().findViewById(R.id.batteryImage);
         batteryPercent = (TextView)getView().findViewById(R.id.batteryPercent);
         speed = (TextView)getView().findViewById(R.id.speed);
+        googleMap = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
+        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
     }
 }
