@@ -9,9 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 
 /**
@@ -30,13 +33,16 @@ public class DisplayFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private ImageView batteryImage;
     private TextView speed,batteryPercent;
-    private GoogleMap googleMap;
+    private MapFragment mapFragment;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    private MapView mapView;
+    private GoogleMap mMap;
 
     /**
      * Use this factory method to create a new instance of
@@ -72,7 +78,13 @@ public class DisplayFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_display, container, false);
+        View v = inflater.inflate(R.layout.fragment_display, container, false);
+        MapsInitializer.initialize(getActivity());
+
+        mapView = (MapView) v.findViewById(R.id.map);
+        mapView.onCreate(savedInstanceState);
+        setUpMapIfNeeded(v);
+        return v;
 
     }
 
@@ -121,7 +133,20 @@ public class DisplayFragment extends Fragment {
         batteryImage = (ImageView)getView().findViewById(R.id.batteryImage);
         batteryPercent = (TextView)getView().findViewById(R.id.batteryPercent);
         speed = (TextView)getView().findViewById(R.id.speed);
-        googleMap = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
-        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
     }
+
+    private void setUpMapIfNeeded(View inflatedView) {
+        if (mMap == null) {
+            mMap = ((MapView) inflatedView.findViewById(R.id.map)).getMap();
+            if (mMap != null) {
+                setUpMap();
+            }
+        }
+    }
+
+    private void setUpMap() {
+        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+    }
+
 }

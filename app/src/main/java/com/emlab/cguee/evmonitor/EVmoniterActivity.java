@@ -1,25 +1,24 @@
 package com.emlab.cguee.evmonitor;
 
-import android.app.Activity;
 import android.app.FragmentTransaction;
-import android.hardware.display.DisplayManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
 
 
-public class EVmoniterActivity extends Activity implements SurfaceHolder.Callback, DisplayFragment.OnFragmentInteractionListener {
+public class EVmoniterActivity extends FragmentActivity implements SurfaceHolder.Callback, DisplayFragment.OnFragmentInteractionListener {
     FragmentTransaction mFragmentTransaction = getFragmentManager()
             .beginTransaction();
 
     SectionsPagerAdapter mSectionsPagerAdapter;
+    public static FragmentManager fragmentManager;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -97,6 +96,7 @@ public class EVmoniterActivity extends Activity implements SurfaceHolder.Callbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_evmoniter);
         mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
+
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
