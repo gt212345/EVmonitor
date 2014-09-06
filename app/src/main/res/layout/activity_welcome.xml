@@ -11,9 +11,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="智慧防盜系統"
-        android:textSize="100dp"
+        android:text="電動車防盜系統"
+        android:textSize="150dp"
+        android:textStyle="italic"
         android:id="@+id/textView"
+        android:scaleType="matrix"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 

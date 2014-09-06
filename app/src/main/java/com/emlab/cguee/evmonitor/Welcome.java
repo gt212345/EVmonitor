@@ -75,16 +75,16 @@ public class Welcome extends Activity {
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
-            account = (EditText)getView().findViewById(R.id.account);
             password = (EditText)getView().findViewById(R.id.password);
             confirm = (Button)getView().findViewById(R.id.confirm);
             confirm.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(account.getText().toString().equals("develop") && password.getText().toString().equals("fuckyou")){
+                    if(password.getText().toString().equals("develop")){
                         Toast.makeText(getActivity(),"Logging in",Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(getActivity(),EVmoniterActivity.class);
                         startActivity(intent);
+                        getActivity().finish();
                     }else{
                         Toast.makeText(getActivity(),"Permission denied",Toast.LENGTH_LONG).show();
                     }

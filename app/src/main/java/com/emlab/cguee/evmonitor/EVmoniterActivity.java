@@ -8,9 +8,12 @@ import android.app.FragmentManager;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
+
+import com.google.android.gms.common.GooglePlayServicesUtil;
 
 
 public class EVmoniterActivity extends FragmentActivity implements SurfaceHolder.Callback, DisplayFragment.OnFragmentInteractionListener {
@@ -96,7 +99,7 @@ public class EVmoniterActivity extends FragmentActivity implements SurfaceHolder
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_evmoniter);
         mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
-
+        Log.w("googleplayservice",""+GooglePlayServicesUtil.isGooglePlayServicesAvailable(this));
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);

@@ -1,17 +1,12 @@
 apply plugin: 'com.android.application'
+apply plugin: 'android'
 
 android {
     signingConfigs {
-        gmap {
-            keyAlias 'gmapkey'
-            keyPassword 'wuheirugt2'
-            storeFile file('/home/user/keystores/gmap.jks')
-            storePassword 'wuheirugt2'
-        }
         config {
             keyAlias 'EVMgmapkey1'
-            keyPassword 'wuheirugt2'
             storeFile file('/Users/hrw/keystore/EVMgmapkey1.jks')
+            keyPassword 'wuheirugt2'
             storePassword 'wuheirugt2'
         }
     }
@@ -23,14 +18,13 @@ android {
         targetSdkVersion 20
         versionCode 1
         versionName '1.0'
+        signingConfig signingConfigs.config
     }
     buildTypes {
-        release {
-            runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.gmap
-        }
         debug {
+            signingConfig signingConfigs.config
+        }
+        release {
             signingConfig signingConfigs.config
         }
     }

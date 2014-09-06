@@ -6,15 +6,17 @@
     tools:context="com.emlab.cguee.evmonitor.DisplayFragment">
 
     <LinearLayout
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <LinearLayout
+            android:layout_weight="1.3"
             android:layout_width="match_parent"
+            android:orientation="vertical"
             android:paddingBottom="10dp"
             android:paddingTop="10dp"
-            android:layout_height="150dp">
+            android:layout_height="match_parent">
 
 
             <ImageView
@@ -25,15 +27,50 @@
                 android:id="@+id/batteryImage" />
 
             <TextView
+                android:layout_margin="10dp"
                 android:id="@+id/batteryPercent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:textColor="#FF000000"
-                android:text="100%"
-                android:textSize="70dp"
+                android:text="95%"
+                android:textSize="90dp"
                 android:textStyle="bold"
                 android:gravity="center"/>
+
+            <TextView
+                android:layout_marginTop="30dp"
+                android:gravity="center_horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.8"
+                android:textColor="#FF000000"
+                android:textSize="80dp"
+                android:textStyle="bold"
+                android:text="電壓\n26.3V"/>
+
+            <TextView
+                android:layout_marginTop="30dp"
+                android:gravity="center_horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="0.8"
+                android:textColor="#FF000000"
+                android:textSize="80dp"
+                android:textStyle="bold"
+                android:text="電流\n7.5A"/>
+
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:layout_height="match_parent">
 
             <ImageView
                 android:layout_width="match_parent"
@@ -41,23 +78,28 @@
                 android:layout_weight="1"
                 android:fadingEdge="none"
                 android:layout_margin="0dp"
-                android:background="@drawable/cgu"
+                android:src="@drawable/eco"
                 android:id="@+id/cgu" />
+
 
             <TextView
                 android:id="@+id/speed"
+                android:layout_marginTop="10dp"
+                android:textStyle="italic"
+                android:paddingRight="8dp"
+                android:textSize="50dp"
+                android:textColor="#FFFFFFFF"
+                android:gravity="right|center_vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.8"
-                android:textColor="#FF000000"
-                android:textSize="50dp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:text="Speed:15km/hr"/>
+                android:layout_weight="0.3"
+                android:background="@drawable/a10"/>
 
         </LinearLayout>
 
         <LinearLayout
+            android:layout_weight="1"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -67,20 +109,6 @@
                 android:layout_width="match_parent"
                 android:layout_weight="0.7"
                 android:layout_height="match_parent" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingRight="7dp"
-                android:src="@drawable/a10"
-                android:layout_weight="1.3"/>
-
-
 
         </LinearLayout>
 

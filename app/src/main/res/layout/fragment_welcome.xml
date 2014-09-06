@@ -13,51 +13,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="帳號:"
-        android:textSize="60dp"
-        android:textStyle="bold"
-        android:layout_marginLeft="200dp"
-        android:layout_marginTop="250dp"
-        android:id="@+id/textView2"
-        android:layout_alignParentTop="true" />
-
-    <EditText
-        android:layout_width="400dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/account"
-        android:layout_alignTop="@+id/textView2"
-        android:layout_toEndOf="@+id/textView2"
-        android:hint="請輸入帳號"
-        android:layout_alignBottom="@+id/textView2" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="密碼:"
-        android:textSize="60dp"
+        android:textSize="80dp"
         android:textStyle="bold"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="200dp"
         android:id="@+id/textView3"
-        android:layout_below="@+id/textView2"
-        android:layout_centerVertical="true"
-        android:layout_alignStart="@+id/textView2" />
+        android:layout_alignParentTop="true"/>
 
     <EditText
+        android:singleLine="true"
         android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
         android:id="@+id/password"
-        android:hint="請輸入帳號"
-        android:layout_alignStart="@+id/account"
-        android:layout_below="@+id/account"
+        android:textSize="50dp"
+        android:hint="請輸入密碼"
+        android:layout_toRightOf="@+id/textView3"
         android:layout_alignBottom="@+id/textView3"
         android:layout_alignTop="@+id/textView3" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="40dp"
+        android:textSize="80dp"
         android:textStyle="bold"
-        android:text="確認"
+        android:text="啟動"
         android:id="@+id/confirm"
         android:layout_below="@+id/password"
         android:layout_alignEnd="@+id/password" />
