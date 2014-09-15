@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -59,6 +61,7 @@ public class Welcome extends Activity {
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
+
         private EditText account,password;
         private Button confirm;
 
@@ -81,6 +84,8 @@ public class Welcome extends Activity {
                 @Override
                 public void onClick(View view) {
                     if(password.getText().toString().equals("develop")){
+                        final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
                         Toast.makeText(getActivity(),"Logging in",Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(getActivity(),EVmoniterActivity.class);
                         startActivity(intent);

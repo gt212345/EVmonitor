@@ -1,6 +1,8 @@
 package com.emlab.cguee.evmonitor;
 
+import android.app.AlertDialog;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -9,6 +11,7 @@ import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
@@ -27,6 +30,37 @@ public class EVmoniterActivity extends FragmentActivity implements SurfaceHolder
      * The {@link ViewPager} that will host the section contents.
      */
     ViewPager mViewPager;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // TODO Auto-generated method stub
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Exit Application");
+            builder.setMessage("The app is shutting down......");
+            builder.setPositiveButton("OK",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (getFragmentManager().getBackStackEntryCount() == 0) {
+                                EVmoniterActivity.this.finish();
+                            } else {
+                                getFragmentManager().popBackStack();
+                            }
+                        }
+                    });
+            builder.setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+            builder.show();
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
     @Override
     public void onFragmentInteraction(Uri uri) {
