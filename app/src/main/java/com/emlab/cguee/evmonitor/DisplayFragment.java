@@ -61,6 +61,9 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private ImageView batteryImage;
     private TextView speed, batteryPercent, voltage, current;
 
+    private static final int HEADER_SIGNAL = 1;
+    private float header;
+
 
     private Handler handler;
     private HandlerThread handlerThread;
@@ -118,9 +121,12 @@ public class DisplayFragment extends Fragment implements LocationListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         locationManager = (LocationManager) getActivity().getSystemService(getActivity().LOCATION_SERVICE);
+        Log.w(TAG,"LocationManager initialized");
 //        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,this);
         myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        Log.w(TAG,"Current location request sent");
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Log.w(TAG,"BluetoothAdapter initialized");
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -138,6 +144,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
         MapsInitializer.initialize(this.getActivity());
+        Log.w(TAG,"MapView constructed");
         mMap = mapView.getMap();
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.setMyLocationEnabled(true);
@@ -152,6 +159,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
         if (myLocation != null) {
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()), 16);
             mMap.animateCamera(cameraUpdate);
+            Log.w(TAG,"MapView location set");
         }
         return v;
     }
@@ -206,6 +214,10 @@ public class DisplayFragment extends Fragment implements LocationListener {
         voltage = (TextView) getView().findViewById(R.id.voltage);
         current = (TextView) getView().findViewById(R.id.current);
         batteryPercent = (TextView) getView().findViewById(R.id.batteryPercent);
+        speedStr = new SpannableString("00" + " km/hr");
+        speedStr.setSpan(new RelativeSizeSpan(4f), 0, 2, 0);
+        speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, 2, 0);
+        speed.setText(speedStr);
         progressDialog = ProgressDialog.show(getActivity(), "please wait", "Searching for device", true);
         if (mBluetoothAdapter == null) {
             Log.w(TAG, "bluetooth not support");
@@ -217,32 +229,34 @@ public class DisplayFragment extends Fragment implements LocationListener {
                 startActivityForResult(turnOnIntent, 1);
             }
         }
-        Log.w(TAG, "TEST");
+        Log.w(TAG, "Bluetooth functionable, start seraching for HC-05");
         findBT();
         BTThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 if (isFind) {
+                    Log.w(TAG, "HC-05 found, trying to connect......");
                     openBT();
                     if (isOpen) {
-                        Log.w(TAG,"Enter isOpen if");
                         ListThread = new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 while (!Thread.currentThread().isInterrupted()
                                         && !stopWorker) {
-                                    Log.w(TAG,"Enter thread");
                                     try {
-                                        if (inputStream.available() >= 7) {
-                                            input = new byte[inputStream.available()];
+                                        if (inputStream.available() >= 0) {
+                                            header = inputStream.read();
+//                                            input = new byte[inputStream.available()];
+                                            input = new byte[7];
                                             inputStream.read(input);
                                             Log.w(TAG,"Data available");
-                                            soc = input[2];
-                                            vol = input[3]/10;
-                                            cur = input[4]/10;
-                                            ac = input[5];
-                                            spe = input[6];
-                                            if(input[0] == 1010) {
+                                            if(header == HEADER_SIGNAL) {
+                                                Log.w(TAG,"Header confirmed");
+                                                soc = input[2]/10;
+                                                vol = input[3]/10;
+                                                cur = input[4]/10;
+                                                ac = input[5]/10;
+                                                spe = input[6]/10;
                                                 getActivity().runOnUiThread(new Runnable() {
                                                     public void run() {
                                                         batteryPercent.setText("" + soc);
@@ -299,7 +313,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                     }
                                                 });
                                             } else {
-                                                inputStream.reset();
                                             }
                                         }
                                     } catch (IOException e) {
@@ -330,7 +343,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
     }
 
     void findBT() {
-        Log.w(TAG, "findBT");
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter
                 .getBondedDevices();
         if (pairedDevices.size() > 0) {
@@ -350,22 +362,25 @@ public class DisplayFragment extends Fragment implements LocationListener {
         // ID
         UUID uuid = btd.getUuids()[0].getUuid();
         try {
+            Log.w(TAG,"Trying to connect with standard method");
             bts = btd.createRfcommSocketToServiceRecord(uuid);
             if(!bts.isConnected()) {
                 bts.connect();
                 inputStream = bts.getInputStream();
                 isOpen = true;
-                Log.w(TAG, "Device connected for first method");
+                Log.w(TAG, "Device connected with standard method");
+                runToastOnUIThread("Device connected");
             }
         } catch (IOException e) {
             try {
-                Log.w(TAG,"First method failed, trying the second one......");
+                Log.w(TAG,"standard method failed, trying with reflect method......");
                 if(!bts.isConnected()) {
                     Method m = btd.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
                     bts = (BluetoothSocket) m.invoke(btd, 1);
                     bts.connect();
                     inputStream = bts.getInputStream();
-                    Log.w(TAG,"Device connected for second method");
+                    Log.w(TAG,"Device connected with reflect method");
+                    runToastOnUIThread("Device connected");
                 }
             } catch (NoSuchMethodException e1) {
                 Log.w(TAG, e1.toString());
@@ -374,11 +389,12 @@ public class DisplayFragment extends Fragment implements LocationListener {
             } catch (IllegalAccessException e1) {
                 Log.w(TAG, e1.toString());
             } catch (IOException e1) {
-                Log.w(TAG,"Second method failed");
+                Log.w(TAG,"reflect method failed, shut down process");
+                runToastOnUIThread("Device not found");
             }
         }
         progressDialog.dismiss();
-        runToastOnUIThread("Device connected");
+
     }
 
     private float[] getFloatArray(InputStream inputStreamTemp) {
