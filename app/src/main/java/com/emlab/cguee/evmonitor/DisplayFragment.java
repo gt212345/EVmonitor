@@ -36,6 +36,10 @@ import com.google.android.gms.maps.model.LatLng;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.OptionalDataException;
+import java.io.StreamCorruptedException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.UUID;
 
@@ -85,7 +89,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private boolean isFind = false;
     private boolean isOpen = false;
     private boolean stopWorker = false;
-    private float[] input;
+    private byte[] input;
     private float soc, vol, cur, ac, spe;
 
     public DisplayFragment() {
@@ -117,7 +121,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
 //        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,this);
         myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        input = new float[6];
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -222,80 +225,88 @@ public class DisplayFragment extends Fragment implements LocationListener {
                 if (isFind) {
                     openBT();
                     if (isOpen) {
+                        Log.w(TAG,"Enter isOpen if");
                         ListThread = new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 while (!Thread.currentThread().isInterrupted()
                                         && !stopWorker) {
+                                    Log.w(TAG,"Enter thread");
                                     try {
-                                        if (inputStream.available() >= 0) {
-                                            input = getFloatArray(inputStream);
-                                            soc = input[1];
-                                            vol = input[2];
-                                            cur = input[3];
-                                            ac = input[4];
-                                            spe = input[5];
-                                            getActivity().runOnUiThread(new Runnable() {
-                                                public void run() {
-                                                    batteryPercent.setText("" + soc);
-                                                    voltage.setText("" + vol);
-                                                    current.setText("" + cur);
-                                                    if (soc >= 95) {
-                                                        batteryImage.setImageResource(R.drawable.b04);
-                                                    } else if (soc >= 67 && soc < 95) {
-                                                        batteryImage.setImageResource(R.drawable.b03);
-                                                    } else if (soc >= 34 && soc < 67) {
-                                                        batteryImage.setImageResource(R.drawable.b02);
-                                                    } else if (soc >= 1 && soc < 34) {
-                                                        batteryImage.setImageResource(R.drawable.b01);
+                                        if (inputStream.available() >= 7) {
+                                            input = new byte[inputStream.available()];
+                                            inputStream.read(input);
+                                            Log.w(TAG,"Data available");
+                                            soc = input[2];
+                                            vol = input[3]/10;
+                                            cur = input[4]/10;
+                                            ac = input[5];
+                                            spe = input[6];
+                                            if(input[0] == 1010) {
+                                                getActivity().runOnUiThread(new Runnable() {
+                                                    public void run() {
+                                                        batteryPercent.setText("" + soc);
+                                                        voltage.setText("" + vol);
+                                                        current.setText("" + cur);
+                                                        if (soc >= 95) {
+                                                            batteryImage.setImageResource(R.drawable.b04);
+                                                        } else if (soc >= 67 && soc < 95) {
+                                                            batteryImage.setImageResource(R.drawable.b03);
+                                                        } else if (soc >= 34 && soc < 67) {
+                                                            batteryImage.setImageResource(R.drawable.b02);
+                                                        } else if (soc >= 1 && soc < 34) {
+                                                            batteryImage.setImageResource(R.drawable.b01);
+                                                        }
+                                                        speedStr = new SpannableString(spe + " km/hr");
+                                                        speedStr.setSpan(new RelativeSizeSpan(4f), 0, 2, 0);
+                                                        speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, 2, 0);
+                                                        speed.setText(speedStr);
+                                                        switch ((int) ac) {
+                                                            case 0:
+                                                                speed.setBackgroundResource(R.drawable.a00);
+                                                                break;
+                                                            case 1:
+                                                                speed.setBackgroundResource(R.drawable.a01);
+                                                                break;
+                                                            case 2:
+                                                                speed.setBackgroundResource(R.drawable.a02);
+                                                                break;
+                                                            case 3:
+                                                                speed.setBackgroundResource(R.drawable.a03);
+                                                                break;
+                                                            case 4:
+                                                                speed.setBackgroundResource(R.drawable.a04);
+                                                                break;
+                                                            case 5:
+                                                                speed.setBackgroundResource(R.drawable.a05);
+                                                                break;
+                                                            case 6:
+                                                                speed.setBackgroundResource(R.drawable.a06);
+                                                                break;
+                                                            case 7:
+                                                                speed.setBackgroundResource(R.drawable.a07);
+                                                                break;
+                                                            case 8:
+                                                                speed.setBackgroundResource(R.drawable.a08);
+                                                                break;
+                                                            case 9:
+                                                                speed.setBackgroundResource(R.drawable.a09);
+                                                                break;
+                                                            case 10:
+                                                                speed.setBackgroundResource(R.drawable.a10);
+                                                                break;
+                                                        }
                                                     }
-                                                    speedStr = new SpannableString(spe + " km/hr");
-                                                    speedStr.setSpan(new RelativeSizeSpan(4f), 0, 2, 0);
-                                                    speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, 2, 0);
-                                                    speed.setText(speedStr);
-                                                    switch ((int) ac) {
-                                                        case 0:
-                                                            speed.setBackgroundResource(R.drawable.a00);
-                                                            break;
-                                                        case 1:
-                                                            speed.setBackgroundResource(R.drawable.a01);
-                                                            break;
-                                                        case 2:
-                                                            speed.setBackgroundResource(R.drawable.a02);
-                                                            break;
-                                                        case 3:
-                                                            speed.setBackgroundResource(R.drawable.a03);
-                                                            break;
-                                                        case 4:
-                                                            speed.setBackgroundResource(R.drawable.a04);
-                                                            break;
-                                                        case 5:
-                                                            speed.setBackgroundResource(R.drawable.a05);
-                                                            break;
-                                                        case 6:
-                                                            speed.setBackgroundResource(R.drawable.a06);
-                                                            break;
-                                                        case 7:
-                                                            speed.setBackgroundResource(R.drawable.a07);
-                                                            break;
-                                                        case 8:
-                                                            speed.setBackgroundResource(R.drawable.a08);
-                                                            break;
-                                                        case 9:
-                                                            speed.setBackgroundResource(R.drawable.a09);
-                                                            break;
-                                                        case 10:
-                                                            speed.setBackgroundResource(R.drawable.a10);
-                                                            break;
-                                                    }
-                                                }
-                                            });
+                                                });
+                                            } else {
+                                                inputStream.reset();
+                                            }
                                         }
                                     } catch (IOException e) {
+                                        Log.w(TAG,e.toString());
                                         stopWorker = true;
                                     }
                                 }
-                                progressDialog.dismiss();
                             }
                         });
                         ListThread.start();
@@ -319,7 +330,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
     }
 
     void findBT() {
-        Log.w(TAG, "finBT");
+        Log.w(TAG, "findBT");
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter
                 .getBondedDevices();
         if (pairedDevices.size() > 0) {
@@ -334,37 +345,56 @@ public class DisplayFragment extends Fragment implements LocationListener {
     }
 
     void openBT() {
-        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // Standard
+//        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // Standard
         // SerialPortService
         // ID
+        UUID uuid = btd.getUuids()[0].getUuid();
         try {
             bts = btd.createRfcommSocketToServiceRecord(uuid);
-//            Method m = btd.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
-//            bts = (BluetoothSocket) m.invoke(btd, 1);
-            bts.connect();
-            Log.w(TAG, "Device connect");
-            inputStream = bts.getInputStream();
-            isOpen = true;
+            if(!bts.isConnected()) {
+                bts.connect();
+                inputStream = bts.getInputStream();
+                isOpen = true;
+                Log.w(TAG, "Device connected for first method");
+            }
         } catch (IOException e) {
-            isOpen = false;
-            Log.w(TAG, e.toString());
-//        } catch (InvocationTargetException e) {
-//            Log.w(TAG,e.toString());
-//            return false;
-//        } catch (NoSuchMethodException e) {
-//            Log.w(TAG,e.toString());
-//            return false;
-//        } catch (IllegalAccessException e) {
-//            Log.w(TAG,e.toString());
-//            return false;
+            try {
+                Log.w(TAG,"First method failed, trying the second one......");
+                if(!bts.isConnected()) {
+                    Method m = btd.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
+                    bts = (BluetoothSocket) m.invoke(btd, 1);
+                    bts.connect();
+                    inputStream = bts.getInputStream();
+                    Log.w(TAG,"Device connected for second method");
+                }
+            } catch (NoSuchMethodException e1) {
+                Log.w(TAG, e1.toString());
+            } catch (InvocationTargetException e1) {
+                Log.w(TAG, e1.toString());
+            } catch (IllegalAccessException e1) {
+                Log.w(TAG, e1.toString());
+            } catch (IOException e1) {
+                Log.w(TAG,"Second method failed");
+            }
         }
+        progressDialog.dismiss();
+        runToastOnUIThread("Device connected");
     }
 
-    private float[] getFloatArray(InputStream inputStream) throws IOException {
+    private float[] getFloatArray(InputStream inputStreamTemp) {
         try {
-            return (float[]) new ObjectInputStream(inputStream).readObject();
+            return (float[]) new ObjectInputStream(inputStreamTemp).readObject();
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            Log.w(TAG,e.toString());
+            return null;
+        } catch (OptionalDataException e) {
+            Log.w(TAG,"getFloatArray: "+e.toString());
+            return null;
+        } catch (StreamCorruptedException e) {
+            Log.w(TAG, "getFloatArray: " + e.toString());
+            return null;
+        } catch (IOException e) {
+            Log.w(TAG, "getFloatArray: " + e.toString());
             return null;
         }
     }
@@ -521,6 +551,15 @@ public class DisplayFragment extends Fragment implements LocationListener {
             handler.postDelayed(testAnim0, 2000);
         }
     };
+
+    void runToastOnUIThread(final String text) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getActivity(),text,Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
 
 }
