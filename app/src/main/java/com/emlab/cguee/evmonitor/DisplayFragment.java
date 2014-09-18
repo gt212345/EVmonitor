@@ -58,10 +58,9 @@ public class DisplayFragment extends Fragment implements LocationListener {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final int HEADER_SIGNAL = 111;
     private ImageView batteryImage;
     private TextView speed, batteryPercent, voltage, current;
-
-    private static final int HEADER_SIGNAL = 1;
     private float header;
 
 
@@ -121,12 +120,12 @@ public class DisplayFragment extends Fragment implements LocationListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         locationManager = (LocationManager) getActivity().getSystemService(getActivity().LOCATION_SERVICE);
-        Log.w(TAG,"LocationManager initialized");
+        Log.w(TAG, "LocationManager initialized");
 //        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,this);
         myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        Log.w(TAG,"Current location request sent");
+        Log.w(TAG, "Current location request sent");
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        Log.w(TAG,"BluetoothAdapter initialized");
+        Log.w(TAG, "BluetoothAdapter initialized");
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -144,7 +143,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
         mapView.onCreate(savedInstanceState);
         mapView.onResume();
         MapsInitializer.initialize(this.getActivity());
-        Log.w(TAG,"MapView constructed");
+        Log.w(TAG, "MapView constructed");
         mMap = mapView.getMap();
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.setMyLocationEnabled(true);
@@ -157,9 +156,9 @@ public class DisplayFragment extends Fragment implements LocationListener {
             }
         }
         if (myLocation != null) {
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()), 16);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()), 17);
             mMap.animateCamera(cameraUpdate);
-            Log.w(TAG,"MapView location set");
+            Log.w(TAG, "MapView location set");
         }
         return v;
     }
@@ -247,16 +246,16 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                         if (inputStream.available() >= 0) {
                                             header = inputStream.read();
 //                                            input = new byte[inputStream.available()];
-                                            input = new byte[7];
-                                            inputStream.read(input);
-                                            Log.w(TAG,"Data available");
-                                            if(header == HEADER_SIGNAL) {
-                                                Log.w(TAG,"Header confirmed");
-                                                soc = input[2]/10;
-                                                vol = input[3]/10;
-                                                cur = input[4]/10;
-                                                ac = input[5]/10;
-                                                spe = input[6]/10;
+                                            Log.w(TAG, "Data available");
+                                            if (header == HEADER_SIGNAL) {
+                                                Log.w(TAG, "Header confirmed");
+                                                input = new byte[8];
+                                                inputStream.read(input);
+                                                soc = input[1];
+                                                vol = input[2] + input[3] / 10;
+                                                cur = input[4] + input[5] / 10;
+                                                ac = input[6];
+                                                spe = input[7];
                                                 getActivity().runOnUiThread(new Runnable() {
                                                     public void run() {
                                                         batteryPercent.setText("" + soc);
@@ -272,8 +271,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                             batteryImage.setImageResource(R.drawable.b01);
                                                         }
                                                         speedStr = new SpannableString(spe + " km/hr");
-                                                        speedStr.setSpan(new RelativeSizeSpan(4f), 0, 2, 0);
-                                                        speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, 2, 0);
+                                                        speedStr.setSpan(new RelativeSizeSpan(4f), 0, 3, 0);
+                                                        speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, 3, 0);
                                                         speed.setText(speedStr);
                                                         switch ((int) ac) {
                                                             case 0:
@@ -316,7 +315,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                             }
                                         }
                                     } catch (IOException e) {
-                                        Log.w(TAG,e.toString());
+                                        Log.w(TAG, e.toString());
                                         stopWorker = true;
                                     }
                                 }
@@ -336,10 +335,10 @@ public class DisplayFragment extends Fragment implements LocationListener {
             }
         });
         BTThread.start();
-//        handlerThread = new HandlerThread("testAnimate");
-//        handlerThread.start();
-//        handler = new Handler(handlerThread.getLooper());
-//        handler.post(testAnim0);
+        handlerThread = new HandlerThread("testAnimate");
+        handlerThread.start();
+        handler = new Handler(handlerThread.getLooper());
+        handler.post(testAnim0);
     }
 
     void findBT() {
@@ -362,9 +361,9 @@ public class DisplayFragment extends Fragment implements LocationListener {
         // ID
         UUID uuid = btd.getUuids()[0].getUuid();
         try {
-            Log.w(TAG,"Trying to connect with standard method");
+            Log.w(TAG, "Trying to connect with standard method");
             bts = btd.createRfcommSocketToServiceRecord(uuid);
-            if(!bts.isConnected()) {
+            if (!bts.isConnected()) {
                 bts.connect();
                 inputStream = bts.getInputStream();
                 isOpen = true;
@@ -373,13 +372,13 @@ public class DisplayFragment extends Fragment implements LocationListener {
             }
         } catch (IOException e) {
             try {
-                Log.w(TAG,"standard method failed, trying with reflect method......");
-                if(!bts.isConnected()) {
+                Log.w(TAG, "standard method failed, trying with reflect method......");
+                if (!bts.isConnected()) {
                     Method m = btd.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
                     bts = (BluetoothSocket) m.invoke(btd, 1);
                     bts.connect();
                     inputStream = bts.getInputStream();
-                    Log.w(TAG,"Device connected with reflect method");
+                    Log.w(TAG, "Device connected with reflect method");
                     runToastOnUIThread("Device connected");
                 }
             } catch (NoSuchMethodException e1) {
@@ -389,7 +388,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
             } catch (IllegalAccessException e1) {
                 Log.w(TAG, e1.toString());
             } catch (IOException e1) {
-                Log.w(TAG,"reflect method failed, shut down process");
+                Log.w(TAG, "reflect method failed, shut down process");
                 runToastOnUIThread("Device not found");
             }
         }
@@ -401,10 +400,10 @@ public class DisplayFragment extends Fragment implements LocationListener {
         try {
             return (float[]) new ObjectInputStream(inputStreamTemp).readObject();
         } catch (ClassNotFoundException e) {
-            Log.w(TAG,e.toString());
+            Log.w(TAG, e.toString());
             return null;
         } catch (OptionalDataException e) {
-            Log.w(TAG,"getFloatArray: "+e.toString());
+            Log.w(TAG, "getFloatArray: " + e.toString());
             return null;
         } catch (StreamCorruptedException e) {
             Log.w(TAG, "getFloatArray: " + e.toString());
@@ -413,6 +412,15 @@ public class DisplayFragment extends Fragment implements LocationListener {
             Log.w(TAG, "getFloatArray: " + e.toString());
             return null;
         }
+    }
+
+    void runToastOnUIThread(final String text) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getActivity(), text, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
@@ -567,15 +575,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
             handler.postDelayed(testAnim0, 2000);
         }
     };
-
-    void runToastOnUIThread(final String text) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getActivity(),text,Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
 
 }
