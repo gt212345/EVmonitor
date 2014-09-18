@@ -18,7 +18,7 @@
         android:textStyle="bold"
         android:layout_marginTop="50dp"
         android:layout_marginLeft="200dp"
-        android:id="@+id/1"
+        android:id="@+id/a"
         android:layout_alignParentTop="true"/>
 
     <TextView
@@ -29,9 +29,9 @@
         android:textColor="@color/red"
         android:gravity="right|center"
         android:textSize="70dp"
-        android:layout_toRightOf="@+id/1"
-        android:layout_alignBottom="@+id/1"
-        android:layout_alignTop="@+id/1" />
+        android:layout_toRightOf="@+id/a"
+        android:layout_alignBottom="@+id/a"
+        android:layout_alignTop="@+id/a" />
 
     <Button
         android:layout_width="wrap_content"

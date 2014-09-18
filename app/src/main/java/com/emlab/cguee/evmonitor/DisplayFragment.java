@@ -335,10 +335,10 @@ public class DisplayFragment extends Fragment implements LocationListener {
             }
         });
         BTThread.start();
-        handlerThread = new HandlerThread("testAnimate");
-        handlerThread.start();
-        handler = new Handler(handlerThread.getLooper());
-        handler.post(testAnim0);
+//        handlerThread = new HandlerThread("testAnimate");
+//        handlerThread.start();
+//        handler = new Handler(handlerThread.getLooper());
+//        handler.post(testAnim0);
     }
 
     void findBT() {
