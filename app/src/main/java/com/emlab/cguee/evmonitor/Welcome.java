@@ -21,9 +21,7 @@ import android.widget.Toast;
 
 
 public class Welcome extends Activity {
-    FragmentManager fragmentManager;
-    private static final String ACCOUNT_DEVELOP = "develop";
-    private static final String PASSWORD_DEVELOP = "fuckyou";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +32,6 @@ public class Welcome extends Activity {
                     .add(R.id.container, new PlaceholderFragment())
                     .commit();
         }
-        fragmentManager = getFragmentManager();
     }
 
 
@@ -62,8 +59,10 @@ public class Welcome extends Activity {
      */
     public static class PlaceholderFragment extends Fragment {
 
-        private EditText account,password;
+        private EditText password;
         private Button confirm;
+        private FragmentManager fragmentManager;
+        private Fragment fragment;
 
         public PlaceholderFragment() {
         }
@@ -71,6 +70,7 @@ public class Welcome extends Activity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
+            fragmentManager = getFragmentManager();
             View rootView = inflater.inflate(R.layout.fragment_welcome, container, false);
             return rootView;
         }
@@ -83,13 +83,12 @@ public class Welcome extends Activity {
             confirm.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(password.getText().toString().equals("develop")){
+                    if(password.getText().toString().equals("develop") && password.getText().toString().equals("")){
                         final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
                         Toast.makeText(getActivity(),"Logging in",Toast.LENGTH_LONG).show();
-                        Intent intent = new Intent(getActivity(),EVmoniterActivity.class);
-                        startActivity(intent);
-                        getActivity().finish();
+                        fragment = new ActiveFragment();
+                        fragmentManager.beginTransaction().replace(R.id.container,fragment).commit();
                     }else{
                         Toast.makeText(getActivity(),"Permission denied",Toast.LENGTH_LONG).show();
                     }

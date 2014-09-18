@@ -13,33 +13,33 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="密碼:"
+        android:text="目前狀態:"
         android:textSize="80dp"
         android:textStyle="bold"
         android:layout_marginTop="50dp"
         android:layout_marginLeft="200dp"
-        android:id="@+id/textView3"
+        android:id="@+id/1"
         android:layout_alignParentTop="true"/>
 
-    <EditText
-        android:singleLine="true"
+    <TextView
         android:layout_width="400dp"
         android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:id="@+id/password"
-        android:textSize="50dp"
-        android:hint="請輸入密碼"
-        android:layout_toRightOf="@+id/textView3"
-        android:layout_alignBottom="@+id/textView3"
-        android:layout_alignTop="@+id/textView3" />
+        android:id="@+id/stat"
+        android:text="未啟動"
+        android:textColor="@color/red"
+        android:gravity="right|center"
+        android:textSize="70dp"
+        android:layout_toRightOf="@+id/1"
+        android:layout_alignBottom="@+id/1"
+        android:layout_alignTop="@+id/1" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="80dp"
         android:textStyle="bold"
-        android:text="解鎖"
-        android:id="@+id/confirm"
-        android:layout_below="@+id/password"
-        android:layout_alignEnd="@+id/password" />
+        android:text="啟動"
+        android:id="@+id/active"
+        android:layout_below="@+id/stat"
+        android:layout_alignEnd="@+id/stat" />
 </RelativeLayout>
