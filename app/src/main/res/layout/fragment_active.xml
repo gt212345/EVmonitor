@@ -42,4 +42,15 @@
         android:id="@+id/active"
         android:layout_below="@+id/stat"
         android:layout_alignEnd="@+id/stat" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="28dp"
+        android:text="切換至監控畫面"
+        android:id="@+id/swi"
+        android:layout_alignBottom="@+id/active"
+        android:layout_toStartOf="@+id/active"
+        android:layout_below="@+id/stat"
+        android:layout_toEndOf="@+id/a" />
 </RelativeLayout>

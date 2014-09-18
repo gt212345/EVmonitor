@@ -17,10 +17,11 @@ import android.widget.TextView;
  */
 public class ActiveFragment extends Fragment {
     private TextView stat;
-    private Button active;
+    private Button active,swi;
     private ProgressDialog progressDialog;
     private Handler handler;
     private HandlerThread handlerThread;
+    private boolean isActivated = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -38,10 +39,21 @@ public class ActiveFragment extends Fragment {
         handler = new Handler(handlerThread.getLooper());
         stat = (TextView) getActivity().findViewById(R.id.stat);
         active = (Button) getActivity().findViewById(R.id.active);
+        swi = (Button) getActivity().findViewById(R.id.swi);
+        swi.setClickable(false);
+        swi.setVisibility(View.INVISIBLE);
+        swi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), EVmoniterActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        });
         active.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                progressDialog = ProgressDialog.show(getActivity(),"Please wait","Activating......",true);
+                progressDialog = ProgressDialog.show(getActivity(),"Please wait","Processing......",true);
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -49,14 +61,23 @@ public class ActiveFragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                stat.setText("啟動");
-                                stat.setTextColor(getResources().getColor(R.color.green));
-                                active.setClickable(false);
+                                if(!isActivated) {
+                                    stat.setText("啟動");
+                                    stat.setTextColor(getResources().getColor(R.color.green));
+                                    isActivated = true;
+                                    active.setText("終止");
+                                    swi.setVisibility(View.VISIBLE);
+                                    swi.setClickable(true);
+                                }else{
+                                    stat.setText("未啟動");
+                                    stat.setTextColor(getResources().getColor(R.color.red));
+                                    isActivated = false;
+                                    active.setText("啟動");
+                                    swi.setVisibility(View.INVISIBLE);
+                                    swi.setClickable(false);
+                                }
                             }
                         });
-                        Intent intent = new Intent(getActivity(), EVmoniterActivity.class);
-                        startActivity(intent);
-                        getActivity().finish();
                     }
                 },1000);
             }
