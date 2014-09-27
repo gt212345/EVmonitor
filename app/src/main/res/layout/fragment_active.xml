@@ -27,8 +27,8 @@
         android:id="@+id/stat"
         android:text="未啟動"
         android:textColor="@color/red"
-        android:gravity="right|center"
-        android:textSize="70dp"
+        android:gravity="right"
+        android:textSize="85dp"
         android:layout_toRightOf="@+id/a"
         android:layout_alignBottom="@+id/a"
         android:layout_alignTop="@+id/a" />

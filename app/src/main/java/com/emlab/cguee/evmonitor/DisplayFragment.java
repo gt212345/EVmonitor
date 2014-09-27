@@ -223,8 +223,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
         }
         if (!mBluetoothAdapter.enable()) {
             if (!mBluetoothAdapter.isEnabled()) {
-                Intent turnOnIntent = new Intent(
-                        BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                Intent turnOnIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 startActivityForResult(turnOnIntent, 1);
             }
         }
@@ -243,19 +242,19 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                 while (!Thread.currentThread().isInterrupted()
                                         && !stopWorker) {
                                     try {
-                                        if (inputStream.available() >= 0) {
-                                            header = inputStream.read();
+                                        if (inputStream.available() >= 9) {
+//                                            header = inputStream.read();
 //                                            input = new byte[inputStream.available()];
                                             Log.w(TAG, "Data available");
-                                            if (header == HEADER_SIGNAL) {
+//                                            if (header == HEADER_SIGNAL) {
                                                 Log.w(TAG, "Header confirmed");
-                                                input = new byte[8];
+                                                input = new byte[9];
                                                 inputStream.read(input);
-                                                soc = input[1];
-                                                vol = input[2] + input[3] / 10;
-                                                cur = input[4] + input[5] / 10;
-                                                ac = input[6];
-                                                spe = input[7];
+                                                soc = input[2];
+                                                vol = input[3] + (float) input[4] / 10;
+                                                cur = input[5] + (float) input[6] / 10;
+                                                ac = input[7];
+                                                spe = input[8];
                                                 getActivity().runOnUiThread(new Runnable() {
                                                     public void run() {
                                                         batteryPercent.setText("" + soc);
@@ -311,8 +310,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                         }
                                                     }
                                                 });
-                                            } else {
-                                            }
+//                                            } else {
+//                                            }
                                         }
                                     } catch (IOException e) {
                                         Log.w(TAG, e.toString());
