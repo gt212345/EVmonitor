@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,6 +34,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -40,6 +42,7 @@ import java.io.OptionalDataException;
 import java.io.StreamCorruptedException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
@@ -61,8 +64,9 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private static final int HEADER_SIGNAL = 111;
     private ImageView batteryImage;
     private TextView speed, batteryPercent, voltage, current;
-    private float header;
+    private int header;
 
+    private BigDecimal bigDecimal;
 
     private Handler handler;
     private HandlerThread handlerThread;
@@ -87,12 +91,14 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothDevice btd;
     private BluetoothSocket bts;
-    private InputStream inputStream;
+    private DataInputStream inputStream;
     private boolean isFind = false;
     private boolean isOpen = false;
     private boolean stopWorker = false;
     private byte[] input;
     private float soc, vol, cur, ac, spe;
+
+    private MediaPlayer mediaPlayer;
 
     public DisplayFragment() {
         // Required empty public constructor
@@ -126,6 +132,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
         Log.w(TAG, "Current location request sent");
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Log.w(TAG, "BluetoothAdapter initialized");
+        mediaPlayer = new MediaPlayer();
+        Log.w(TAG, "MediaPlayer construction completed");
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -227,7 +235,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
                 startActivityForResult(turnOnIntent, 1);
             }
         }
-        Log.w(TAG, "Bluetooth functionable, start seraching for HC-05");
+        Log.w(TAG, "Bluetooth functionable, start searching for HC-05");
         findBT();
         BTThread = new Thread(new Runnable() {
             @Override
@@ -242,19 +250,35 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                 while (!Thread.currentThread().isInterrupted()
                                         && !stopWorker) {
                                     try {
-                                        if (inputStream.available() >= 9) {
-//                                            header = inputStream.read();
-//                                            input = new byte[inputStream.available()];
+                                        while(inputStream.available() > 0) {
                                             Log.w(TAG, "Data available");
-//                                            if (header == HEADER_SIGNAL) {
+                                            header = (int) inputStream.readFloat();
+                                            if (header == HEADER_SIGNAL) {
                                                 Log.w(TAG, "Header confirmed");
-                                                input = new byte[9];
-                                                inputStream.read(input);
-                                                soc = input[2];
-                                                vol = input[3] + (float) input[4] / 10;
-                                                cur = input[5] + (float) input[6] / 10;
-                                                ac = input[7];
-                                                spe = input[8];
+//                                                input = new byte[8];
+//                                                inputStream.read(input);
+//                                                soc = input[1];
+//                                                vol = (int)((float) input[2] + (float) input[3] / 10);
+//                                                cur = (int)((float) input[4] + (float) input[5] / 10);
+//                                                ac = input[6];
+//                                                spe = (float) input[7];
+                                                soc = (float) inputStream.readFloat();
+                                                soc = (Float) inputStream.readFloat();
+                                                vol = (Float)inputStream.readFloat() + (Float)inputStream.readFloat()/10;
+                                                cur = (Float)inputStream.readFloat() + (Float)inputStream.readFloat()/10;
+                                                ac = (Float)inputStream.readFloat();
+                                                spe = (Float)inputStream.readFloat();
+//                                            bigDecimal = new BigDecimal(inputStream.read());
+//                                            soc = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).intValue();
+//                                            bigDecimal = new BigDecimal(inputStream.read() + (inputStream.read() / 10));
+//                                            vol = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
+//                                            bigDecimal = new BigDecimal(inputStream.read() + (inputStream.read() / 10));
+//                                            cur = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
+//                                            bigDecimal = new BigDecimal(inputStream.read());
+//                                            ac = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).intValue();
+//                                            bigDecimal = new BigDecimal(inputStream.read());
+//                                            spe = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).intValue();
+                                                Log.w(TAG, "input = :" + soc + "," + vol + "," + cur + "," + ac + "," + spe);
                                                 getActivity().runOnUiThread(new Runnable() {
                                                     public void run() {
                                                         batteryPercent.setText("" + soc);
@@ -269,9 +293,9 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                         } else if (soc >= 1 && soc < 34) {
                                                             batteryImage.setImageResource(R.drawable.b01);
                                                         }
-                                                        speedStr = new SpannableString(spe + " km/hr");
-                                                        speedStr.setSpan(new RelativeSizeSpan(4f), 0, 3, 0);
-                                                        speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, 3, 0);
+                                                        speedStr = new SpannableString((int) spe + " km/hr");
+                                                        speedStr.setSpan(new RelativeSizeSpan(4f), 0, String.valueOf(spe).length(), 0);
+                                                        speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, String.valueOf(spe).length(), 0);
                                                         speed.setText(speedStr);
                                                         switch ((int) ac) {
                                                             case 0:
@@ -312,9 +336,11 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                 });
 //                                            } else {
 //                                            }
+//                                            inputStream.reset();
+                                            }
                                         }
                                     } catch (IOException e) {
-                                        Log.w(TAG, e.toString());
+                                        Log.w(TAG, e.toString()+e.getMessage());
                                         stopWorker = true;
                                     }
                                 }
@@ -364,9 +390,9 @@ public class DisplayFragment extends Fragment implements LocationListener {
             bts = btd.createRfcommSocketToServiceRecord(uuid);
             if (!bts.isConnected()) {
                 bts.connect();
-                inputStream = bts.getInputStream();
-                isOpen = true;
                 Log.w(TAG, "Device connected with standard method");
+                inputStream = new DataInputStream(bts.getInputStream());
+                isOpen = true;
                 runToastOnUIThread("Device connected");
             }
         } catch (IOException e) {
@@ -376,8 +402,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
                     Method m = btd.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
                     bts = (BluetoothSocket) m.invoke(btd, 1);
                     bts.connect();
-                    inputStream = bts.getInputStream();
                     Log.w(TAG, "Device connected with reflect method");
+                    inputStream = new DataInputStream(bts.getInputStream());
                     runToastOnUIThread("Device connected");
                 }
             } catch (NoSuchMethodException e1) {
