@@ -253,19 +253,18 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                         && !stopWorker) {
                                     try {
                                         while(inputStream.available() >= 9) {
-//                                            Log.w(TAG, "Data available");
-//                                            input = new byte[9];
-//                                            int useless = inputStream.read(input);
-                                            header = inputStream.read();
-                                            if (header == HEADER_SIGNAL) {
+//                                            header = inputStream.read();
+                                            input = new byte[9];
+                                            inputStream.read(input);
+                                            if (input[0] == HEADER_SIGNAL) {
                                                 Log.w(TAG, "Header confirmed");
-                                                input = new byte[8];
-                                                inputStream.read(input);
-                                                soc = input[1];
-                                                vol = (input[2] + input[3] / 10);
-                                                cur = (input[4] + input[5] / 10);
-                                                ac = input[6];
-                                                spe = input[7];
+//                                                input = new byte[8];
+//                                                inputStream.read(input);
+                                                soc = input[2];
+                                                vol = (input[3] + input[4] / 10);
+                                                cur = (input[5] + input[6] / 10);
+                                                ac = input[7];
+                                                spe = input[8];
 //                                                soc = inputStream.read();
 //                                                soc = inputStream.read();
 //                                                float volTemp = inputStream.read();
@@ -284,59 +283,63 @@ public class DisplayFragment extends Fragment implements LocationListener {
 //                                            ac = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
 //                                            bigDecimal = new BigDecimal(inputStream.read());
 //                                            spe = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
-                                                Log.w(TAG, "input = :" + soc + "," + vol + "," + cur + "," + ac + "," + spe + "???" + input[0]);
+                                                Log.w(TAG, "input = :" + soc + "," + vol + "," + cur + "," + ac + "," + spe);
                                                 getActivity().runOnUiThread(new Runnable() {
                                                     public void run() {
-                                                        batteryPercent.setText((int)soc + "%");
-                                                        voltage.setText(vol+"\n電壓");
-                                                        current.setText(cur+"\n電流");
-                                                        if (soc >= 95) {
-                                                            batteryImage.setImageResource(R.drawable.b04);
-                                                        } else if (soc >= 67 && soc < 95) {
-                                                            batteryImage.setImageResource(R.drawable.b03);
-                                                        } else if (soc >= 34 && soc < 67) {
-                                                            batteryImage.setImageResource(R.drawable.b02);
-                                                        } else if (soc >= 0 && soc < 34) {
-                                                            batteryImage.setImageResource(R.drawable.b01);
+                                                        if(soc < 100 && soc >= 0 && vol < 27 && vol >= 22 && cur < 21 && cur >=0 ) {
+                                                            batteryPercent.setText((int) soc + "%");
+                                                            voltage.setText("電壓\n" + vol + "V");
+                                                            current.setText("電流\n" + cur + "A");
+                                                            if (soc >= 95) {
+                                                                batteryImage.setImageResource(R.drawable.b04);
+                                                            } else if (soc >= 67 && soc < 95) {
+                                                                batteryImage.setImageResource(R.drawable.b03);
+                                                            } else if (soc >= 34 && soc < 67) {
+                                                                batteryImage.setImageResource(R.drawable.b02);
+                                                            } else if (soc >= 0 && soc < 34) {
+                                                                batteryImage.setImageResource(R.drawable.b01);
+                                                            }
                                                         }
-                                                        speedStr = new SpannableString((int) spe + " km/hr");
-                                                        speedStr.setSpan(new RelativeSizeSpan(4f), 0, String.valueOf(spe).length()-1, 0);
-                                                        speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, String.valueOf(spe).length()-1, 0);
-                                                        speed.setText(speedStr);
-                                                        switch ((int) ac) {
-                                                            case 0:
-                                                                speed.setBackgroundResource(R.drawable.a00);
-                                                                break;
-                                                            case 1:
-                                                                speed.setBackgroundResource(R.drawable.a01);
-                                                                break;
-                                                            case 2:
-                                                                speed.setBackgroundResource(R.drawable.a02);
-                                                                break;
-                                                            case 3:
-                                                                speed.setBackgroundResource(R.drawable.a03);
-                                                                break;
-                                                            case 4:
-                                                                speed.setBackgroundResource(R.drawable.a04);
-                                                                break;
-                                                            case 5:
-                                                                speed.setBackgroundResource(R.drawable.a05);
-                                                                break;
-                                                            case 6:
-                                                                speed.setBackgroundResource(R.drawable.a06);
-                                                                break;
-                                                            case 7:
-                                                                speed.setBackgroundResource(R.drawable.a07);
-                                                                break;
-                                                            case 8:
-                                                                speed.setBackgroundResource(R.drawable.a08);
-                                                                break;
-                                                            case 9:
-                                                                speed.setBackgroundResource(R.drawable.a09);
-                                                                break;
-                                                            case 10:
-                                                                speed.setBackgroundResource(R.drawable.a10);
-                                                                break;
+                                                        if(spe < 20 && spe >= 0 && ac <= 10 && ac >= 0) {
+                                                            speedStr = new SpannableString((int) spe + " km/hr");
+                                                            speedStr.setSpan(new RelativeSizeSpan(4f), 0, String.valueOf(spe).length() - 1, 0);
+                                                            speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, String.valueOf(spe).length() - 1, 0);
+                                                            speed.setText(speedStr);
+                                                            switch ((int) ac) {
+                                                                case 0:
+                                                                    speed.setBackgroundResource(R.drawable.a00);
+                                                                    break;
+                                                                case 1:
+                                                                    speed.setBackgroundResource(R.drawable.a01);
+                                                                    break;
+                                                                case 2:
+                                                                    speed.setBackgroundResource(R.drawable.a02);
+                                                                    break;
+                                                                case 3:
+                                                                    speed.setBackgroundResource(R.drawable.a03);
+                                                                    break;
+                                                                case 4:
+                                                                    speed.setBackgroundResource(R.drawable.a04);
+                                                                    break;
+                                                                case 5:
+                                                                    speed.setBackgroundResource(R.drawable.a05);
+                                                                    break;
+                                                                case 6:
+                                                                    speed.setBackgroundResource(R.drawable.a06);
+                                                                    break;
+                                                                case 7:
+                                                                    speed.setBackgroundResource(R.drawable.a07);
+                                                                    break;
+                                                                case 8:
+                                                                    speed.setBackgroundResource(R.drawable.a08);
+                                                                    break;
+                                                                case 9:
+                                                                    speed.setBackgroundResource(R.drawable.a09);
+                                                                    break;
+                                                                case 10:
+                                                                    speed.setBackgroundResource(R.drawable.a10);
+                                                                    break;
+                                                            }
                                                         }
                                                     }
                                                 });
