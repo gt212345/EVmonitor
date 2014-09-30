@@ -34,9 +34,11 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.OptionalDataException;
 import java.io.StreamCorruptedException;
@@ -64,7 +66,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private static final int HEADER_SIGNAL = 111;
     private ImageView batteryImage;
     private TextView speed, batteryPercent, voltage, current;
-    private int header;
+    private float header;
 
     private BigDecimal bigDecimal;
 
@@ -91,7 +93,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothDevice btd;
     private BluetoothSocket bts;
-    private DataInputStream inputStream;
+    private InputStream inputStream;
     private boolean isFind = false;
     private boolean isOpen = false;
     private boolean stopWorker = false;
@@ -250,52 +252,56 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                 while (!Thread.currentThread().isInterrupted()
                                         && !stopWorker) {
                                     try {
-                                        while(inputStream.available() > 0) {
-                                            Log.w(TAG, "Data available");
-                                            header = (int) inputStream.readFloat();
+                                        while(inputStream.available() >= 9) {
+//                                            Log.w(TAG, "Data available");
+//                                            input = new byte[9];
+//                                            int useless = inputStream.read(input);
+                                            header = inputStream.read();
                                             if (header == HEADER_SIGNAL) {
                                                 Log.w(TAG, "Header confirmed");
-//                                                input = new byte[8];
-//                                                inputStream.read(input);
-//                                                soc = input[1];
-//                                                vol = (int)((float) input[2] + (float) input[3] / 10);
-//                                                cur = (int)((float) input[4] + (float) input[5] / 10);
-//                                                ac = input[6];
-//                                                spe = (float) input[7];
-                                                soc = (float) inputStream.readFloat();
-                                                soc = (Float) inputStream.readFloat();
-                                                vol = (Float)inputStream.readFloat() + (Float)inputStream.readFloat()/10;
-                                                cur = (Float)inputStream.readFloat() + (Float)inputStream.readFloat()/10;
-                                                ac = (Float)inputStream.readFloat();
-                                                spe = (Float)inputStream.readFloat();
-//                                            bigDecimal = new BigDecimal(inputStream.read());
-//                                            soc = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).intValue();
+                                                input = new byte[8];
+                                                inputStream.read(input);
+                                                soc = input[1];
+                                                vol = (input[2] + input[3] / 10);
+                                                cur = (input[4] + input[5] / 10);
+                                                ac = input[6];
+                                                spe = input[7];
+//                                                soc = inputStream.read();
+//                                                soc = inputStream.read();
+//                                                float volTemp = inputStream.read();
+//                                                vol = volTemp + (float)inputStream.read()/10;
+//                                                float curTemp = inputStream.read();
+//                                                cur = curTemp + (float)inputStream.read()/10;
+//                                                ac = inputStream.read();
+//                                                spe = inputStream.read();
+//                                            bigDecimal = new BigDecimal((float)inputStream.read());
+//                                            soc = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
 //                                            bigDecimal = new BigDecimal(inputStream.read() + (inputStream.read() / 10));
 //                                            vol = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
 //                                            bigDecimal = new BigDecimal(inputStream.read() + (inputStream.read() / 10));
 //                                            cur = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
 //                                            bigDecimal = new BigDecimal(inputStream.read());
-//                                            ac = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).intValue();
+//                                            ac = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
 //                                            bigDecimal = new BigDecimal(inputStream.read());
-//                                            spe = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).intValue();
-                                                Log.w(TAG, "input = :" + soc + "," + vol + "," + cur + "," + ac + "," + spe);
+//                                            spe = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
+                                                Log.w(TAG, "input = :" + soc + "," + vol + "," + cur + "," + ac + "," + spe + "???" + input[0]);
                                                 getActivity().runOnUiThread(new Runnable() {
                                                     public void run() {
-                                                        batteryPercent.setText("" + soc);
-                                                        voltage.setText("" + vol);
-                                                        current.setText("" + cur);
+                                                        batteryPercent.setText((int)soc + "%");
+                                                        voltage.setText(vol+"\n電壓");
+                                                        current.setText(cur+"\n電流");
                                                         if (soc >= 95) {
                                                             batteryImage.setImageResource(R.drawable.b04);
                                                         } else if (soc >= 67 && soc < 95) {
                                                             batteryImage.setImageResource(R.drawable.b03);
                                                         } else if (soc >= 34 && soc < 67) {
                                                             batteryImage.setImageResource(R.drawable.b02);
-                                                        } else if (soc >= 1 && soc < 34) {
+                                                        } else if (soc >= 0 && soc < 34) {
                                                             batteryImage.setImageResource(R.drawable.b01);
                                                         }
                                                         speedStr = new SpannableString((int) spe + " km/hr");
-                                                        speedStr.setSpan(new RelativeSizeSpan(4f), 0, String.valueOf(spe).length(), 0);
-                                                        speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, String.valueOf(spe).length(), 0);
+                                                        speedStr.setSpan(new RelativeSizeSpan(4f), 0, String.valueOf(spe).length()-1, 0);
+                                                        speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, String.valueOf(spe).length()-1, 0);
                                                         speed.setText(speedStr);
                                                         switch ((int) ac) {
                                                             case 0:
@@ -334,9 +340,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                         }
                                                     }
                                                 });
-//                                            } else {
-//                                            }
-//                                            inputStream.reset();
+                                            }else{
+                                                inputStream.skip(1);
                                             }
                                         }
                                     } catch (IOException e) {
@@ -391,7 +396,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
             if (!bts.isConnected()) {
                 bts.connect();
                 Log.w(TAG, "Device connected with standard method");
-                inputStream = new DataInputStream(bts.getInputStream());
+//                inputStream = new DataInputStream(bts.getInputStream());
+                inputStream = bts.getInputStream();
                 isOpen = true;
                 runToastOnUIThread("Device connected");
             }
@@ -414,11 +420,10 @@ public class DisplayFragment extends Fragment implements LocationListener {
                 Log.w(TAG, e1.toString());
             } catch (IOException e1) {
                 Log.w(TAG, "reflect method failed, shut down process");
-                runToastOnUIThread("Device not found");
+//                runToastOnUIThread("Device not found");
             }
         }
         progressDialog.dismiss();
-
     }
 
     private float[] getFloatArray(InputStream inputStreamTemp) {
