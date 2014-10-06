@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -64,7 +65,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final int HEADER_SIGNAL = 111;
-    private ImageView batteryImage;
+    private ImageView batteryImage,cgu;
     private TextView speed, batteryPercent, voltage, current;
     private float header;
 
@@ -140,7 +141,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
     }
 
     @Override
@@ -217,6 +217,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        cgu = (ImageView) getView().findViewById(R.id.cgu);
         batteryImage = (ImageView) getView().findViewById(R.id.batteryImage);
         batteryPercent = (TextView) getView().findViewById(R.id.batteryPercent);
         speed = (TextView) getView().findViewById(R.id.speed);
@@ -227,6 +228,22 @@ public class DisplayFragment extends Fragment implements LocationListener {
         speedStr.setSpan(new RelativeSizeSpan(4f), 0, 2, 0);
         speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, 2, 0);
         speed.setText(speedStr);
+        cgu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i;
+                PackageManager manager = getActivity().getPackageManager();
+                try {
+                    i = manager.getLaunchIntentForPackage("com.littlehilllearning.twradio");
+                    if (i == null)
+                        throw new PackageManager.NameNotFoundException();
+                    i.addCategory(Intent.CATEGORY_LAUNCHER);
+                    startActivity(i);
+                } catch (PackageManager.NameNotFoundException e) {
+
+                }
+            }
+        });
         progressDialog = ProgressDialog.show(getActivity(), "please wait", "Searching for device", true);
         if (mBluetoothAdapter == null) {
             Log.w(TAG, "bluetooth not support");
