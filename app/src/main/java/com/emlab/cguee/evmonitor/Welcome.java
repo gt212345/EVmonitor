@@ -7,6 +7,7 @@ import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -21,6 +22,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import java.io.IOException;
 
 
 public class Welcome extends Activity {
@@ -78,6 +81,7 @@ public class Welcome extends Activity {
         private ProgressDialog progressDialog;
         private HandlerThread handlerThread;
         private Handler handler;
+        private MediaPlayer mediaPlayer;
 
         public PlaceholderFragment() {
         }
@@ -86,6 +90,7 @@ public class Welcome extends Activity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             fragmentManager = getFragmentManager();
+            mediaPlayer = new MediaPlayer();
             View rootView = inflater.inflate(R.layout.fragment_welcome, container, false);
             return rootView;
         }
@@ -93,6 +98,13 @@ public class Welcome extends Activity {
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
+            try {
+                mediaPlayer.setDataSource("/sdcard/Download/unlock.mp3");
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+            } catch (IOException e) {
+                e.toString();
+            }
             handlerThread = new HandlerThread("PD");
             handlerThread.start();
             handler = new Handler(handlerThread.getLooper());
@@ -110,6 +122,7 @@ public class Welcome extends Activity {
                             @Override
                             public void run() {
                                 fragment = new ActiveFragment();
+                                mediaPlayer.release();
                                 fragmentManager.beginTransaction().replace(R.id.container,fragment).commit();
                             }
                         },1000);

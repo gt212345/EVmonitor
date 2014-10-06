@@ -45,34 +45,26 @@ public class ActiveFragment extends Fragment {
     private static final String TAG = "ActiveFragment";
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mediaPlayer = new MediaPlayer();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_active,container,false);
-        mediaPlayer = new MediaPlayer();
         return v;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        try {
-            mediaPlayer.setDataSource("/sdcard/Download/unlock.mp3");
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         progressDialog = ((Welcome)getActivity()).getDialog();
         progressDialog.dismiss();
         handlerThread = new HandlerThread("");
         handlerThread.start();
         handler = new Handler(handlerThread.getLooper());
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                findBT();
-            }
-        });
         stat = (TextView) getActivity().findViewById(R.id.stat);
         active = (Button) getActivity().findViewById(R.id.active);
         swi = (Button) getActivity().findViewById(R.id.swi);
@@ -82,6 +74,12 @@ public class ActiveFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(), EVmoniterActivity.class);
+                try {
+                    outputStream.close();
+                    bts.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 startActivity(intent);
                 getActivity().finish();
             }
@@ -90,50 +88,16 @@ public class ActiveFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 progressDialog = ProgressDialog.show(getActivity(),"Please wait","Processing......",true);
-                handler.postDelayed(new Runnable() {
+                handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        progressDialog.dismiss();
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if(!isActivated) {
-                                    if(bts.isConnected()) {
-                                        try {
-                                            outputStream.write(1);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                        stat.setText("啟動");
-                                        stat.setTextColor(getResources().getColor(R.color.green));
-                                        isActivated = true;
-                                        active.setText("終止");
-                                        swi.setVisibility(View.VISIBLE);
-                                        swi.setClickable(true);
-                                    } else {
-                                        Toast.makeText(getActivity(),"Device offline",Toast.LENGTH_SHORT).show();
-                                    }
-                                }else{
-                                    if(bts.isConnected()) {
-                                        try {
-                                            outputStream.write(0);
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                        stat.setText("未啟動");
-                                        stat.setTextColor(getResources().getColor(R.color.red));
-                                        isActivated = false;
-                                        active.setText("啟動");
-                                        swi.setVisibility(View.INVISIBLE);
-                                        swi.setClickable(false);
-                                    } else {
-                                        Toast.makeText(getActivity(),"Device offline",Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            }
-                        });
+                        if(bts == null) {
+                            findBT();
+                        } else {
+                            handler.post(onclick);
+                        }
                     }
-                },1000);
+                });
             }
         });
     }
@@ -168,6 +132,8 @@ public class ActiveFragment extends Fragment {
                 Log.w(TAG, "Device connected with standard method");
 //                inputStream = new DataInputStream(bts.getInputStream());
                 outputStream = bts.getOutputStream();
+                handler.post(onclick);
+                progressDialog.dismiss();
             }
         } catch (IOException e) {
             try {
@@ -178,6 +144,8 @@ public class ActiveFragment extends Fragment {
                     bts.connect();
                     Log.w(TAG, "Device connected with reflect method");
                     outputStream = bts.getOutputStream();
+                    handler.post(onclick);
+                    progressDialog.dismiss();
                 }
             } catch (NoSuchMethodException e1) {
                 Log.w(TAG, e1.toString());
@@ -190,6 +158,54 @@ public class ActiveFragment extends Fragment {
 //                runToastOnUIThread("Device not found");
             }
         }
-        progressDialog.dismiss();
     }
+
+    private Runnable onclick = new Runnable() {
+        @Override
+        public void run() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(!isActivated) {
+                        if(bts.isConnected()) {
+                            try {
+                                outputStream.write(1);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            stat.setText("啟動");
+                            stat.setTextColor(getResources().getColor(R.color.green));
+                            isActivated = true;
+                            active.setText("終止");
+                            swi.setVisibility(View.VISIBLE);
+                            swi.setClickable(true);
+                        } else {
+                            Toast.makeText(getActivity(),"Device offline",Toast.LENGTH_SHORT).show();
+                        }
+                    }else{
+                        if(bts.isConnected()) {
+                            try {
+                                outputStream.write(0);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            stat.setText("未啟動");
+                            stat.setTextColor(getResources().getColor(R.color.red));
+                            isActivated = false;
+                            active.setText("啟動");
+                            swi.setVisibility(View.INVISIBLE);
+                            swi.setClickable(false);
+                            try {
+                                bts.close();
+                            } catch (IOException e) {
+                                e.toString();
+                            }
+                        } else {
+                            Toast.makeText(getActivity(),"Device offline",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            });
+        }
+    };
 }

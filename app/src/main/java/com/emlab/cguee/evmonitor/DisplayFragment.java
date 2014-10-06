@@ -15,6 +15,7 @@ import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.SpannableString;
@@ -71,6 +72,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
 
     private BigDecimal bigDecimal;
 
+    private double speedDetect;
+
     private Handler handler;
     private HandlerThread handlerThread;
 
@@ -99,7 +102,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private boolean isOpen = false;
     private boolean stopWorker = false;
     private byte[] input;
-    private float soc, vol, cur, ac, spe;
+    private double soc, vol, cur, ac, spe, back;
+    private int dnrInt;
 
     private MediaPlayer mediaPlayer;
 
@@ -296,43 +300,44 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                         && !stopWorker) {
                                     try {
                                         while(inputStream.available() >= 9) {
-//                                            header = inputStream.read();
                                             input = new byte[9];
                                             inputStream.read(input);
                                             if (input[0] == HEADER_SIGNAL) {
                                                 Log.w(TAG, "Header confirmed");
-//                                                input = new byte[8];
-//                                                inputStream.read(input);
-                                                soc = input[2];
-                                                vol = (input[3] + input[4] / 10);
-                                                cur = (input[5] + input[6] / 10);
-                                                ac = input[7];
-                                                spe = input[8];
-//                                                soc = inputStream.read();
-//                                                soc = inputStream.read();
-//                                                float volTemp = inputStream.read();
-//                                                vol = volTemp + (float)inputStream.read()/10;
-//                                                float curTemp = inputStream.read();
-//                                                cur = curTemp + (float)inputStream.read()/10;
-//                                                ac = inputStream.read();
-//                                                spe = inputStream.read();
-//                                            bigDecimal = new BigDecimal((float)inputStream.read());
-//                                            soc = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
-//                                            bigDecimal = new BigDecimal(inputStream.read() + (inputStream.read() / 10));
-//                                            vol = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
-//                                            bigDecimal = new BigDecimal(inputStream.read() + (inputStream.read() / 10));
-//                                            cur = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
-//                                            bigDecimal = new BigDecimal(inputStream.read());
-//                                            ac = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
-//                                            bigDecimal = new BigDecimal(inputStream.read());
-//                                            spe = bigDecimal.setScale(5,BigDecimal.ROUND_HALF_UP).floatValue();
-                                                Log.w(TAG, "input = :" + soc + "," + vol + "," + cur + "," + ac + "," + spe);
+                                                soc = input[1];
+                                                vol = ((double) input[2] + ((double) input[3] / 10));
+                                                cur = ((double) input[4] + ((double) input[5] / 10));
+                                                ac = input[6];
+                                                spe = input[7];
+                                                dnrInt = (int)input[8];
+                                                Log.w(TAG, "input = :" + soc + "," + vol + "," + cur + "," + ac + "," + dnrInt);
                                                 getActivity().runOnUiThread(new Runnable() {
                                                     public void run() {
-                                                        if(soc < 100 && soc >= 0 && vol < 27 && vol >= 22 && cur < 21 && cur >=0 ) {
-                                                            batteryPercent.setText((int) soc + "%");
+                                                        if (back < 100 && back > 5) {
+                                                            handler.post(warning);
+                                                            handler.postDelayed(bump, 1000);
+                                                        }
+                                                        if (vol < 27 && vol >= 22) {
                                                             voltage.setText("電壓\n" + vol + "V");
+                                                        }
+                                                        if (cur < 21 && cur >= 0) {
                                                             current.setText("電流\n" + cur + "A");
+                                                        }
+                                                        if (dnrInt > 0 && dnrInt <= 3) {
+                                                            switch (dnrInt) {
+                                                                case 1:
+                                                                    dnr.setImageResource(R.drawable.d);
+                                                                    break;
+                                                                case 2:
+                                                                    dnr.setImageResource(R.drawable.n);
+                                                                    break;
+                                                                case 3:
+                                                                    dnr.setImageResource(R.drawable.r);
+                                                                    break;
+                                                            }
+                                                        }
+                                                        if (soc < 100 && soc >= 0) {
+                                                            batteryPercent.setText((int) soc + "%");
                                                             if (soc >= 95) {
                                                                 batteryImage.setImageResource(R.drawable.b04);
                                                             } else if (soc >= 67 && soc < 95) {
@@ -341,13 +346,24 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                                 batteryImage.setImageResource(R.drawable.b02);
                                                             } else if (soc >= 0 && soc < 34) {
                                                                 batteryImage.setImageResource(R.drawable.b01);
+                                                                if (soc < 10) {
+                                                                    handler.post(warning);
+                                                                    handler.postDelayed(lowB, 1000);
+                                                                }
                                                             }
                                                         }
-                                                        if(spe < 20 && spe >= 0 && ac <= 10 && ac >= 0) {
-                                                            speedStr = new SpannableString((int) spe + " km/hr");
-                                                            speedStr.setSpan(new RelativeSizeSpan(4f), 0, String.valueOf(spe).length() - 1, 0);
-                                                            speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, String.valueOf(spe).length() - 1, 0);
-                                                            speed.setText(speedStr);
+                                                        if (spe < 20 && spe >= 0 && ac <= 10 && ac >= 0) {
+                                                            if (spe - speedDetect < 10 && spe - speedDetect > -10) {
+                                                                if (spe >= 14) {
+                                                                    handler.post(warning);
+                                                                    handler.postDelayed(overS, 1000);
+                                                                }
+                                                                speedDetect = spe;
+                                                                speedStr = new SpannableString((int) spe + " km/hr");
+                                                                speedStr.setSpan(new RelativeSizeSpan(4f), 0, String.valueOf(spe).length() - 1, 0);
+                                                                speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, String.valueOf(spe).length() - 1, 0);
+                                                                speed.setText(speedStr);
+                                                            }
                                                             switch ((int) ac) {
                                                                 case 0:
                                                                     speed.setBackgroundResource(R.drawable.a00);
@@ -411,9 +427,9 @@ public class DisplayFragment extends Fragment implements LocationListener {
             }
         });
         BTThread.start();
-//        handlerThread = new HandlerThread("testAnimate");
-//        handlerThread.start();
-//        handler = new Handler(handlerThread.getLooper());
+        handlerThread = new HandlerThread("voice");
+        handlerThread.start();
+        handler = new Handler(handlerThread.getLooper());
 //        handler.post(testAnim0);
     }
 
@@ -514,141 +530,64 @@ public class DisplayFragment extends Fragment implements LocationListener {
         public void onFragmentInteraction(Uri uri);
     }
 
-    private Runnable testAnim0 = new Runnable() {
+    private Runnable warning = new Runnable() {
         @Override
         public void run() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    speed.setBackgroundResource(R.drawable.a00);
-                    batteryImage.setImageResource(R.drawable.b04);
-                }
-            });
-            handler.postDelayed(testAnim1, 200);
-        }
-    };
-    private Runnable testAnim1 = new Runnable() {
-        @Override
-        public void run() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    speed.setBackgroundResource(R.drawable.a01);
-                }
-            });
-            handler.postDelayed(testAnim2, 150);
-        }
-    };
-    private Runnable testAnim2 = new Runnable() {
-        @Override
-        public void run() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    speed.setBackgroundResource(R.drawable.a02);
-                }
-            });
-            handler.postDelayed(testAnim3, 150);
-        }
-    };
-    private Runnable testAnim3 = new Runnable() {
-        @Override
-        public void run() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    speed.setBackgroundResource(R.drawable.a03);
-                    batteryImage.setImageResource(R.drawable.b03);
-                }
-            });
-            handler.postDelayed(testAnim4, 150);
-        }
-    };
-    private Runnable testAnim4 = new Runnable() {
-        @Override
-        public void run() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    speed.setBackgroundResource(R.drawable.a04);
-                }
-            });
-            handler.postDelayed(testAnim5, 150);
-        }
-    };
-    private Runnable testAnim5 = new Runnable() {
-        @Override
-        public void run() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    speed.setBackgroundResource(R.drawable.a05);
-                }
-            });
-            handler.postDelayed(testAnim6, 150);
-        }
-    };
-    private Runnable testAnim6 = new Runnable() {
-        @Override
-        public void run() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    speed.setBackgroundResource(R.drawable.a06);
-                    batteryImage.setImageResource(R.drawable.b02);
-                }
-            });
-            handler.postDelayed(testAnim7, 150);
-        }
-    };
-    private Runnable testAnim7 = new Runnable() {
-        @Override
-        public void run() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    speed.setBackgroundResource(R.drawable.a07);
-                }
-            });
-            handler.postDelayed(testAnim8, 150);
-        }
-    };
-    private Runnable testAnim8 = new Runnable() {
-        @Override
-        public void run() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    speed.setBackgroundResource(R.drawable.a08);
-                }
-            });
-            handler.postDelayed(testAnim9, 150);
-        }
-    };
-    private Runnable testAnim9 = new Runnable() {
-        @Override
-        public void run() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    speed.setBackgroundResource(R.drawable.a09);
-                    batteryImage.setImageResource(R.drawable.b01);
-                }
-            });
-            handler.postDelayed(testAnim10, 150);
+            try {
+                mediaPlayer.setDataSource(Environment.getExternalStorageDirectory().getPath()+"/Download/warning.mp3");
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     };
 
-    private Runnable testAnim10 = new Runnable() {
+    private Runnable bump = new Runnable() {
         @Override
         public void run() {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    speed.setBackgroundResource(R.drawable.a10);
+            try {
+                mediaPlayer.setDataSource(Environment.getExternalStorageDirectory().getPath()+"/Download/bump.mp3");
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                if(back < 100 && back > 5) {
+                    handler.postDelayed(bump, 5000);
                 }
-            });
-            handler.postDelayed(testAnim0, 2000);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private Runnable lowB = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                mediaPlayer.setDataSource(Environment.getExternalStorageDirectory().getPath()+"/Download/low_battery.mp3");
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                if(soc < 10) {
+                    handler.postDelayed(lowB, 180000);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private Runnable overS = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                mediaPlayer.setDataSource(Environment.getExternalStorageDirectory().getPath()+"/Download/slow_down.mp3");
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                if(spe >= 14){
+                    handler.postDelayed(overS,5000);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     };
 
