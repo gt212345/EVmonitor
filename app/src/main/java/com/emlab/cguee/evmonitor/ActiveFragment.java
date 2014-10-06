@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -39,18 +40,27 @@ public class ActiveFragment extends Fragment {
     private BluetoothDevice btd;
     private BluetoothSocket bts;
     private OutputStream outputStream;
+    private MediaPlayer mediaPlayer;
 
     private static final String TAG = "ActiveFragment";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_active,container,false);
+        mediaPlayer = new MediaPlayer();
         return v;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        try {
+            mediaPlayer.setDataSource("/sdcard/Download/unlock.mp3");
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         progressDialog = ((Welcome)getActivity()).getDialog();
         progressDialog.dismiss();

@@ -65,7 +65,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final int HEADER_SIGNAL = 111;
-    private ImageView batteryImage,cgu;
+    private ImageView batteryImage,cgu,dnr,radio,navigation;
     private TextView speed, batteryPercent, voltage, current;
     private float header;
 
@@ -218,6 +218,9 @@ public class DisplayFragment extends Fragment implements LocationListener {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         cgu = (ImageView) getView().findViewById(R.id.cgu);
+        navigation = (ImageView) getView().findViewById(R.id.navigation);
+        radio = (ImageView) getView().findViewById(R.id.radio);
+        dnr = (ImageView) getView().findViewById(R.id.dnr);
         batteryImage = (ImageView) getView().findViewById(R.id.batteryImage);
         batteryPercent = (TextView) getView().findViewById(R.id.batteryPercent);
         speed = (TextView) getView().findViewById(R.id.speed);
@@ -228,13 +231,36 @@ public class DisplayFragment extends Fragment implements LocationListener {
         speedStr.setSpan(new RelativeSizeSpan(4f), 0, 2, 0);
         speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, 2, 0);
         speed.setText(speedStr);
-        cgu.setOnClickListener(new View.OnClickListener() {
+        try {
+            mediaPlayer.setDataSource("/sdcard/Download/welcome.mp3");
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        radio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent i;
                 PackageManager manager = getActivity().getPackageManager();
                 try {
                     i = manager.getLaunchIntentForPackage("com.littlehilllearning.twradio");
+                    if (i == null)
+                        throw new PackageManager.NameNotFoundException();
+                    i.addCategory(Intent.CATEGORY_LAUNCHER);
+                    startActivity(i);
+                } catch (PackageManager.NameNotFoundException e) {
+
+                }
+            }
+        });
+        navigation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i;
+                PackageManager manager = getActivity().getPackageManager();
+                try {
+                    i = manager.getLaunchIntentForPackage("com.ultimarom.launchnavigation");
                     if (i == null)
                         throw new PackageManager.NameNotFoundException();
                     i.addCategory(Intent.CATEGORY_LAUNCHER);

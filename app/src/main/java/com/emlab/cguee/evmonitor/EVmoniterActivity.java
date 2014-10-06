@@ -19,7 +19,7 @@ import android.view.SurfaceHolder;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 
-public class EVmoniterActivity extends FragmentActivity implements SurfaceHolder.Callback, DisplayFragment.OnFragmentInteractionListener {
+public class EVmoniterActivity extends FragmentActivity implements SurfaceHolder.Callback, DisplayFragment.OnFragmentInteractionListener, VideoRecordFragment.OnFragmentInteractionListener {
     FragmentTransaction mFragmentTransaction = getFragmentManager()
             .beginTransaction();
 
@@ -86,7 +86,7 @@ public class EVmoniterActivity extends FragmentActivity implements SurfaceHolder
                     mFragmentTransaction.addToBackStack(null);
                     break;
                 case 1:
-                    fragment = DisplayFragment.newInstance("test1","test2");
+                    fragment = VideoRecordFragment.newInstance("","");
                     mFragmentTransaction.addToBackStack(null);
                     break;
                 case 2:

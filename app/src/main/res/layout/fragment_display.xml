@@ -74,14 +74,54 @@
             android:paddingTop="10dp"
             android:layout_height="match_parent">
 
-            <ImageView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:fadingEdge="none"
-                android:layout_margin="0dp"
-                android:src="@drawable/eco"
-                android:id="@+id/cgu" />
+                android:orientation="horizontal"
+                android:layout_weight="0.9">
+
+                <ImageView
+                    android:id="@+id/dnr"
+                    android:layout_width="match_parent"
+                    android:layout_height="115dp"
+                    android:layout_weight="1"
+                    android:src="@drawable/d"/>
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:fadingEdge="none"
+                    android:layout_margin="0dp"
+                    android:src="@drawable/eco"
+                    android:id="@+id/cgu" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_weight="1.5">
+
+                    <ImageView
+                        android:id="@+id/navigation"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:src="@drawable/navigation"/>
+
+                    <ImageView
+                        android:id="@+id/radio"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:src="@drawable/radio"/>
+
+
+
+                </LinearLayout>
+
+
+            </LinearLayout>
 
 
             <TextView
