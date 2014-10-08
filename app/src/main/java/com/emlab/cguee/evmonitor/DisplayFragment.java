@@ -43,6 +43,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.OptionalDataException;
+import java.io.OutputStream;
 import java.io.StreamCorruptedException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -96,6 +97,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private BluetoothDevice btd;
     private BluetoothSocket bts;
     private InputStream inputStream;
+    private OutputStream outputStream;
     private boolean isFind = false;
     private boolean isOpen = false;
     private boolean stopWorker = false;
@@ -296,6 +298,11 @@ public class DisplayFragment extends Fragment implements LocationListener {
                             public void run() {
                                 while (!Thread.currentThread().isInterrupted()
                                         && !stopWorker) {
+//                                    try {
+//                                        outputStream.write(1);
+//                                    } catch (IOException e) {
+//                                        e.toString();
+//                                    }
                                     try {
                                         while(inputStream.available() >= 10) {
                                             input = new byte[10];
@@ -340,18 +347,10 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                                 batteryImage.setImageResource(R.drawable.b02);
                                                             } else if (soc >= 0 && soc < 34) {
                                                                 batteryImage.setImageResource(R.drawable.b01);
-                                                                if (soc < 10) {
-//                                                                    handler.post(warning);
-//                                                                    handler.postDelayed(lowB, 1000);
-                                                                }
                                                             }
                                                         }
                                                         if (spe < 17 && spe >= 0 && ac <= 10 && ac >= 0) {
                                                             if (spe - speedDetect < 10 && spe - speedDetect > -10) {
-                                                                if (spe >= 14) {
-//                                                                    handler.post(warning);
-//                                                                    handler.postDelayed(overS, 1000);
-                                                                }
                                                                 speedDetect = spe;
                                                                 speedStr = new SpannableString((int) spe + " km/hr");
                                                                 speedStr.setSpan(new RelativeSizeSpan(4f), 0, String.valueOf(spe).length() - 1, 0);
@@ -424,6 +423,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
         handlerThread = new HandlerThread("voice");
         handlerThread.start();
         handler = new Handler(handlerThread.getLooper());
+        Thread detect = new Thread(voiceWarn);
+        detect.start();
     }
 
     void findBT() {
@@ -441,9 +442,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
     }
 
     void openBT() {
-//        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // Standard
-        // SerialPortService
-        // ID
         UUID uuid = btd.getUuids()[0].getUuid();
         try {
             Log.w(TAG, "Trying to connect with standard method");
@@ -451,8 +449,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
             if (!bts.isConnected()) {
                 bts.connect();
                 Log.w(TAG, "Device connected with standard method");
-//                inputStream = new DataInputStream(bts.getInputStream());
                 inputStream = bts.getInputStream();
+                outputStream = bts.getOutputStream();
                 isOpen = true;
                 runToastOnUIThread("Device connected");
             }
@@ -464,7 +462,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
                     bts = (BluetoothSocket) m.invoke(btd, 1);
                     bts.connect();
                     Log.w(TAG, "Device connected with reflect method");
-                    inputStream = new DataInputStream(bts.getInputStream());
+                    inputStream = bts.getInputStream();
+                    outputStream = bts.getOutputStream();
                     runToastOnUIThread("Device connected");
                 }
             } catch (NoSuchMethodException e1) {
@@ -523,15 +522,19 @@ public class DisplayFragment extends Fragment implements LocationListener {
         public void onFragmentInteraction(Uri uri);
     }
 
-    private Runnable warning = new Runnable() {
+    private Runnable voiceWarn = new Runnable() {
         @Override
         public void run() {
-            try {
-                mediaPlayer.setDataSource(Environment.getExternalStorageDirectory().getPath()+"/Download/warning.mp3");
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-            } catch (IOException e) {
-                e.printStackTrace();
+            while(true){
+                if(spe >= 13){
+                    handler.post(warning);
+                    handler.postDelayed(overS,1000);
+                }
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     };
@@ -540,14 +543,29 @@ public class DisplayFragment extends Fragment implements LocationListener {
         @Override
         public void run() {
             try {
-                mediaPlayer.setDataSource(Environment.getExternalStorageDirectory().getPath()+"/Download/low_battery.mp3");
+                mediaPlayer.reset();
+                mediaPlayer.setDataSource("/sdcard/Download/low_battery.mp3");
                 mediaPlayer.prepare();
                 mediaPlayer.start();
                 if(soc < 10) {
                     handler.postDelayed(lowB, 180000);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                e.toString();
+            }
+        }
+    };
+
+    private Runnable warning = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                mediaPlayer.reset();
+                mediaPlayer.setDataSource("/sdcard/Download/warning.mp3");
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+            } catch (IOException e) {
+                e.toString();
             }
         }
     };
@@ -556,14 +574,15 @@ public class DisplayFragment extends Fragment implements LocationListener {
         @Override
         public void run() {
             try {
-                mediaPlayer.setDataSource(Environment.getExternalStorageDirectory().getPath()+"/Download/slow_down.mp3");
+                mediaPlayer.reset();
+                mediaPlayer.setDataSource("/sdcard/Download/slow_down.mp3");
                 mediaPlayer.prepare();
                 mediaPlayer.start();
                 if(spe >= 14){
                     handler.postDelayed(overS,5000);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.w(TAG,e.toString());
             }
         }
     };
