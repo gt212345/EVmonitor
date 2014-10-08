@@ -27,15 +27,9 @@ public class VideoRecord {
         mrec.setCamera(mCamera);
         mCamera.unlock();
         mrec.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-//        mrec.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
         mrec.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mrec.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
-//        mrec.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
         mrec.setVideoSize(320,240);
-//        mrec.setVideoEncodingBitRate(500000);
-//        mrec.setAudioEncodingBitRate(196608);
-//        mrec.setOrientationHint(270);
-//        mrec.setVideoFrameRate(20);
         mrec.setOutputFile("/sdcard/"+filename+".mp4");
         mrec.prepare();
         mrec.start();
