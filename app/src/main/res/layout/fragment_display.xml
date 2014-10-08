@@ -33,7 +33,6 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:textColor="#FF000000"
-                android:text="95%"
                 android:textSize="90dp"
                 android:textStyle="bold"
                 android:gravity="center"/>
@@ -47,8 +46,7 @@
                 android:layout_weight="0.8"
                 android:textColor="#FF000000"
                 android:textSize="80dp"
-                android:textStyle="bold"
-                android:text="電壓\n26.3V"/>
+                android:textStyle="bold"/>
 
             <TextView
                 android:id="@+id/current"
@@ -59,8 +57,7 @@
                 android:layout_weight="0.8"
                 android:textColor="#FF000000"
                 android:textSize="80dp"
-                android:textStyle="bold"
-                android:text="電流\n7.5A"/>
+                android:textStyle="bold"/>
 
 
 

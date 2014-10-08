@@ -70,8 +70,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private TextView speed, batteryPercent, voltage, current;
     private float header;
 
-    private BigDecimal bigDecimal;
-
     private double speedDetect;
 
     private Handler handler;
@@ -102,7 +100,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private boolean isOpen = false;
     private boolean stopWorker = false;
     private byte[] input;
-    private double soc, vol, cur, ac, spe, back;
+    private double soc, vol, cur, ac, spe;
     private int dnrInt;
 
     private MediaPlayer mediaPlayer;
@@ -299,8 +297,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                 while (!Thread.currentThread().isInterrupted()
                                         && !stopWorker) {
                                     try {
-                                        while(inputStream.available() >= 9) {
-                                            input = new byte[9];
+                                        while(inputStream.available() >= 10) {
+                                            input = new byte[10];
                                             inputStream.read(input);
                                             if (input[0] == HEADER_SIGNAL) {
                                                 Log.w(TAG, "Header confirmed");
@@ -310,13 +308,9 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                 ac = input[6];
                                                 spe = input[7];
                                                 dnrInt = (int)input[8];
-                                                Log.w(TAG, "input = :" + soc + "," + vol + "," + cur + "," + ac + "," + dnrInt);
+                                                Log.w(TAG, "input = :"+input[0]+"|"+input[1]+"|"+vol+"|"+cur+"|"+ac+"|"+spe+"|"+dnrInt+"|"+input[9]);
                                                 getActivity().runOnUiThread(new Runnable() {
                                                     public void run() {
-                                                        if (back < 100 && back > 5) {
-                                                            handler.post(warning);
-                                                            handler.postDelayed(bump, 1000);
-                                                        }
                                                         if (vol < 27 && vol >= 22) {
                                                             voltage.setText("電壓\n" + vol + "V");
                                                         }
@@ -347,16 +341,16 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                             } else if (soc >= 0 && soc < 34) {
                                                                 batteryImage.setImageResource(R.drawable.b01);
                                                                 if (soc < 10) {
-                                                                    handler.post(warning);
-                                                                    handler.postDelayed(lowB, 1000);
+//                                                                    handler.post(warning);
+//                                                                    handler.postDelayed(lowB, 1000);
                                                                 }
                                                             }
                                                         }
-                                                        if (spe < 20 && spe >= 0 && ac <= 10 && ac >= 0) {
+                                                        if (spe < 17 && spe >= 0 && ac <= 10 && ac >= 0) {
                                                             if (spe - speedDetect < 10 && spe - speedDetect > -10) {
                                                                 if (spe >= 14) {
-                                                                    handler.post(warning);
-                                                                    handler.postDelayed(overS, 1000);
+//                                                                    handler.post(warning);
+//                                                                    handler.postDelayed(overS, 1000);
                                                                 }
                                                                 speedDetect = spe;
                                                                 speedStr = new SpannableString((int) spe + " km/hr");
@@ -430,7 +424,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
         handlerThread = new HandlerThread("voice");
         handlerThread.start();
         handler = new Handler(handlerThread.getLooper());
-//        handler.post(testAnim0);
     }
 
     void findBT() {
@@ -543,22 +536,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
         }
     };
 
-    private Runnable bump = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                mediaPlayer.setDataSource(Environment.getExternalStorageDirectory().getPath()+"/Download/bump.mp3");
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-                if(back < 100 && back > 5) {
-                    handler.postDelayed(bump, 5000);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
     private Runnable lowB = new Runnable() {
         @Override
         public void run() {
@@ -590,6 +567,4 @@ public class DisplayFragment extends Fragment implements LocationListener {
             }
         }
     };
-
-
 }
