@@ -71,7 +71,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private ImageView batteryImage,cgu,dnr,radio,navigation;
     private TextView speed, batteryPercent, voltage, current;
     private float header;
-    private boolean isNotRec = true;
 
     private double speedDetect;
 
