@@ -1,13 +1,21 @@
 package com.emlab.cguee.evmonitor;
 
 import android.app.Activity;
+import android.content.DialogInterface;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.IOException;
 
 
 /**
@@ -19,7 +27,7 @@ import android.view.ViewGroup;
  * create an instance of this fragment.
  *
  */
-public class VideoRecordFragment extends Fragment {
+public class VideoRecordFragment extends Fragment implements SurfaceHolder.Callback {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -28,6 +36,12 @@ public class VideoRecordFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private Camera mCamera;
+    private SurfaceView surfaceView;
+    private SurfaceHolder surfaceHolder;
+    private TextView record;
+    private VideoRecord videoRecord;
+    private boolean isNotRec = true;
 
     private OnFragmentInteractionListener mListener;
 
@@ -92,6 +106,26 @@ public class VideoRecordFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void surfaceCreated(SurfaceHolder surfaceHolder) {
+
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder surfaceHoldert, int i, int i2, int i3) {
+        try {
+            mCamera.setPreviewDisplay(surfaceHoldert);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mCamera.startPreview();
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+        mCamera.release();
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -105,6 +139,71 @@ public class VideoRecordFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        record = (TextView) getActivity().findViewById(R.id.record);
+        mCamera = getCameraInstance();
+        surfaceView = (SurfaceView) getView().findViewById(R.id.surfaceView);
+        surfaceHolder = surfaceView.getHolder();
+        surfaceHolder.addCallback(this);
+        videoRecord = new VideoRecord("Record",mCamera,surfaceView.getWidth(),surfaceView.getHeight());
+        record.setOnClickListener(onClickListener);
+    }
+
+    View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (isNotRec) {
+                Toast.makeText(getActivity(), "Record Start", Toast.LENGTH_SHORT).show();
+                isNotRec = false;
+                try {
+                    videoRecord.startEncoding();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Toast.makeText(getActivity(), "Record Stop", Toast.LENGTH_SHORT).show();
+                isNotRec = true;
+                videoRecord.stopEncoding();
+            }
+        }
+    };
+
+    public Camera getCameraInstance() {
+        Camera c = null;
+        try {
+            c = openBackFacingCamera();
+        }
+        catch (Exception e){
+            Log.w("getfrontcamera", e.toString());
+        }
+        return c;
+    }
+
+    private Camera openBackFacingCamera() {
+        int cameraCount;
+        Camera cam = null;
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        cameraCount = Camera.getNumberOfCameras();
+        for (int camIdx = 0; camIdx<cameraCount; camIdx++) {
+            Camera.getCameraInfo(camIdx, cameraInfo);
+            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                try {
+                    cam = Camera.open(camIdx);
+                    Log.w("Camera","No:"+String.valueOf(camIdx)+" get");
+                    Camera.Parameters param = cam.getParameters();
+                    param.set( "cam_mode", 1 );
+                    param.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                    cam.setParameters( param );
+                } catch (RuntimeException e) {
+                    Log.e("Your_TAG", "Camera failed to open: " + e.getLocalizedMessage());
+                }
+            }
+        }
+        return cam;
     }
 
 }

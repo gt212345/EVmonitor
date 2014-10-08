@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.hardware.Camera;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -70,6 +71,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private ImageView batteryImage,cgu,dnr,radio,navigation;
     private TextView speed, batteryPercent, voltage, current;
     private float header;
+    private boolean isNotRec = true;
 
     private double speedDetect;
 
@@ -303,6 +305,9 @@ public class DisplayFragment extends Fragment implements LocationListener {
 //                                    } catch (IOException e) {
 //                                        e.toString();
 //                                    }
+                                    if(!bts.isConnected()){
+                                        openBT();
+                                    }
                                     try {
                                         while(inputStream.available() >= 10) {
                                             input = new byte[10];
@@ -526,7 +531,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
         @Override
         public void run() {
             while(true){
-                if(spe >= 13){
+                if(spe > 13 && spe <= 16){
                     handler.post(warning);
                     handler.postDelayed(overS,1000);
                 }
@@ -578,7 +583,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
                 mediaPlayer.setDataSource("/sdcard/Download/slow_down.mp3");
                 mediaPlayer.prepare();
                 mediaPlayer.start();
-                if(spe >= 14){
+                if(spe >= 14 && spe <17){
                     handler.postDelayed(overS,5000);
                 }
             } catch (IOException e) {
@@ -586,4 +591,5 @@ public class DisplayFragment extends Fragment implements LocationListener {
             }
         }
     };
+
 }

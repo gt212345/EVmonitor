@@ -77,12 +77,31 @@
                 android:orientation="horizontal"
                 android:layout_weight="0.9">
 
-                <ImageView
-                    android:id="@+id/dnr"
+                <LinearLayout
+                    android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="115dp"
-                    android:layout_weight="1"
-                    android:src="@drawable/n"/>
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:id="@+id/dnr"
+                        android:layout_width="match_parent"
+                        android:layout_height="115dp"
+                        android:src="@drawable/n"/>
+
+                    <TextView
+                        android:id="@+id/record"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:textColor="@color/red"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:textSize="50dp"
+                        android:text="REC"/>
+
+
+                </LinearLayout>
+
 
                 <ImageView
                     android:layout_width="match_parent"
