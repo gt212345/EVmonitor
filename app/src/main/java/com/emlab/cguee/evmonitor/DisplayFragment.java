@@ -89,7 +89,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
 
     private SpannableString speedStr;
 
-    private int animat = 0;
     private Location myLocation;
     private LocationManager locationManager;
 
