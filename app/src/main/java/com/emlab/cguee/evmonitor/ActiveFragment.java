@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -60,7 +59,7 @@ public class ActiveFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        progressDialog = ((Welcome)getActivity()).getDialog();
+        progressDialog = ((WelcomeActivity)getActivity()).getDialog();
         progressDialog.dismiss();
         handlerThread = new HandlerThread("");
         handlerThread.start();
@@ -170,6 +169,7 @@ public class ActiveFragment extends Fragment {
                         if(bts.isConnected()) {
                             try {
                                 outputStream.write(1);
+                                Log.w("Active Code","Sent");
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -179,8 +179,9 @@ public class ActiveFragment extends Fragment {
                             active.setText("終止");
                             swi.setVisibility(View.VISIBLE);
                             swi.setClickable(true);
+                            progressDialog.dismiss();
                         } else {
-                            Toast.makeText(getActivity(),"Device offline",Toast.LENGTH_SHORT).show();
+                            findBT();
                         }
                     }else{
                         if(bts.isConnected()) {
@@ -197,11 +198,12 @@ public class ActiveFragment extends Fragment {
                             swi.setClickable(false);
                             try {
                                 bts.close();
+                                progressDialog.dismiss();
                             } catch (IOException e) {
-                                e.toString();
+                                Log.w("終止",e.toString());
                             }
                         } else {
-                            Toast.makeText(getActivity(),"Device offline",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(),"Device already offline",Toast.LENGTH_SHORT).show();
                         }
                     }
                 }

@@ -101,6 +101,22 @@ public class VideoRecordFragment extends Fragment implements SurfaceHolder.Callb
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        videoRecord.stopEncoding();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mCamera = getCameraInstance();
+        surfaceView = (SurfaceView) getView().findViewById(R.id.surfaceView);
+        surfaceHolder = surfaceView.getHolder();
+        surfaceHolder.addCallback(this);
+        videoRecord = new VideoRecord("Record",mCamera,surfaceView.getWidth(),surfaceView.getHeight());
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
@@ -123,6 +139,7 @@ public class VideoRecordFragment extends Fragment implements SurfaceHolder.Callb
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+        mCamera.stopPreview();
         mCamera.release();
     }
 
@@ -145,11 +162,6 @@ public class VideoRecordFragment extends Fragment implements SurfaceHolder.Callb
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         record = (TextView) getActivity().findViewById(R.id.record);
-        mCamera = getCameraInstance();
-        surfaceView = (SurfaceView) getView().findViewById(R.id.surfaceView);
-        surfaceHolder = surfaceView.getHolder();
-        surfaceHolder.addCallback(this);
-        videoRecord = new VideoRecord("Record",mCamera,surfaceView.getWidth(),surfaceView.getHeight());
         record.setOnClickListener(onClickListener);
     }
 

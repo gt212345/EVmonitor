@@ -1,12 +1,10 @@
 package com.emlab.cguee.evmonitor;
 
 import android.app.Activity;
-import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,7 +23,7 @@ import android.widget.Toast;
 import java.io.IOException;
 
 
-public class Welcome extends Activity {
+public class WelcomeActivity extends Activity {
     private ProgressDialog progressDialog;
 
 
@@ -103,7 +100,7 @@ public class Welcome extends Activity {
                 mediaPlayer.prepare();
                 mediaPlayer.start();
             } catch (IOException e) {
-                e.toString();
+                Log.w("WelcomeActivity",e.toString());
             }
             handlerThread = new HandlerThread("PD");
             handlerThread.start();
@@ -113,11 +110,11 @@ public class Welcome extends Activity {
             confirm.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(password.getText().toString().equals("develop") || password.getText().toString().equals("")){
+                    if(password.getText().toString().equals("wnchang") || password.getText().toString().equals("")){
                         final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
                         progressDialog = ProgressDialog.show(getActivity(), "please wait", "Logging in", true);
-                        ((Welcome)getActivity()).storeDialog(progressDialog);
+                        ((WelcomeActivity)getActivity()).storeDialog(progressDialog);
                         handler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -125,7 +122,7 @@ public class Welcome extends Activity {
                                 mediaPlayer.release();
                                 fragmentManager.beginTransaction().replace(R.id.container,fragment).commit();
                             }
-                        },1000);
+                        },0);
                     }else{
                         Toast.makeText(getActivity(),"Permission denied",Toast.LENGTH_LONG).show();
                     }

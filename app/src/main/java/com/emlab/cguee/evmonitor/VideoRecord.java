@@ -9,6 +9,7 @@ import java.io.IOException;
  * Created by hrw on 14/9/18.
  */
 public class VideoRecord {
+    private boolean isRecording = false;
     private MediaRecorder mrec;
     private Camera mCamera;
     private String filename;
@@ -24,6 +25,7 @@ public class VideoRecord {
     }
 
     public void startEncoding() throws IOException {
+        isRecording = true;
         mrec.setCamera(mCamera);
         mCamera.unlock();
         mrec.setVideoSource(MediaRecorder.VideoSource.CAMERA);
@@ -36,9 +38,11 @@ public class VideoRecord {
     }
 
     public void stopEncoding(){
-        mrec.stop();
-        mrec.reset();
-        mrec.release();
+        if(isRecording) {
+            mrec.stop();
+            mrec.reset();
+            mrec.release();
+        }
     }
 
 

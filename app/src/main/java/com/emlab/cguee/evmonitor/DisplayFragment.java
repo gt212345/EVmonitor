@@ -321,7 +321,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                 Log.w(TAG, "input = :"+input[0]+"|"+input[1]+"|"+vol+"|"+cur+"|"+ac+"|"+spe+"|"+dnrInt+"|"+input[9]);
                                                 getActivity().runOnUiThread(new Runnable() {
                                                     public void run() {
-                                                        if (vol < 27 && vol >= 22) {
+                                                        if (vol < 29 && vol >= 22) {
                                                             voltage.setText("電壓\n" + vol + "V");
                                                         }
                                                         if (cur < 21 && cur >= 0) {
@@ -340,15 +340,15 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                                     break;
                                                             }
                                                         }
-                                                        if (soc < 100 && soc >= 0) {
+                                                        if (soc <= 100 && soc >= 0) {
                                                             batteryPercent.setText((int) soc + "%");
-                                                            if (soc >= 95) {
+                                                            if (soc >= 85) {
                                                                 batteryImage.setImageResource(R.drawable.b04);
-                                                            } else if (soc >= 67 && soc < 95) {
+                                                            } else if (soc >= 60 && soc < 85) {
                                                                 batteryImage.setImageResource(R.drawable.b03);
-                                                            } else if (soc >= 34 && soc < 67) {
+                                                            } else if (soc >= 30 && soc < 60) {
                                                                 batteryImage.setImageResource(R.drawable.b02);
-                                                            } else if (soc >= 0 && soc < 34) {
+                                                            } else if (soc >= 0 && soc < 30) {
                                                                 batteryImage.setImageResource(R.drawable.b01);
                                                             }
                                                         }
