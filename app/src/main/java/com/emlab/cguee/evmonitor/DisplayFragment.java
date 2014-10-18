@@ -344,11 +344,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                             }
                                                         }
                                                         if (soc <= 100 && soc >= 0) {
-                                                            if(soc <= 40 && !isLow){
-                                                                isLow = true;
-                                                                Thread detectLow = new Thread(lowB);
-                                                                detectLow.start();
-                                                            }
                                                             batteryPercent.setText((int) soc + "%");
                                                             if (soc >= 85) {
                                                                 batteryImage.setImageResource(R.drawable.b04);
@@ -363,10 +358,13 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                                     }
                                                                 }
                                                                 batteryImage.setImageResource(R.drawable.b02);
-
                                                             } else if (soc >= 0 && soc < 30) {
                                                                 batteryImage.setImageResource(R.drawable.b01);
-
+                                                                if(soc <= 10 && !isLow){
+                                                                    isLow = true;
+                                                                    Thread detectLow = new Thread(lowB);
+                                                                    detectLow.start();
+                                                                }
                                                             }
                                                         }
                                                         if (spe < 17 && spe >= 0 && ac <= 10 && ac >= 0) {
