@@ -350,7 +350,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                             } else if (soc >= 60 && soc < 85) {
                                                                 batteryImage.setImageResource(R.drawable.b03);
                                                             } else if (soc >= 30 && soc < 60) {
-                                                                if(soc < 50 && soc > 40){
+                                                                if(soc <= 50 && soc > 10){
                                                                     if(isLower == false) {
                                                                         Thread detectLower = new Thread(lower50);
                                                                         detectLower.start();
