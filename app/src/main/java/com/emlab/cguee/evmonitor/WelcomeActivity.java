@@ -124,6 +124,13 @@ public class WelcomeActivity extends Activity {
                             }
                         },0);
                     }else{
+                        try {
+                            mediaPlayer.reset();
+                            mediaPlayer.setDataSource("/sdcard/Download/wrong_password.mp3");
+                            mediaPlayer.prepare();
+                            mediaPlayer.start();
+                        } catch (IOException e) {
+                        }
                         Toast.makeText(getActivity(),"Permission denied",Toast.LENGTH_LONG).show();
                     }
                 }

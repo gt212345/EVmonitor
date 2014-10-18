@@ -58,6 +58,13 @@ public class ActiveFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        try {
+            mediaPlayer.setDataSource("/sdcard/Download/unlock_success.mp3");
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            Log.w("WelcomeActivity",e.toString());
+        }
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         progressDialog = ((WelcomeActivity)getActivity()).getDialog();
         progressDialog.dismiss();
@@ -136,26 +143,39 @@ public class ActiveFragment extends Fragment {
             }
         } catch (IOException e) {
             try {
-                Log.w(TAG, "standard method failed, trying with reflect method......");
-                if (!bts.isConnected()) {
-                    Method m = btd.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
-                    bts = (BluetoothSocket) m.invoke(btd, 1);
-                    bts.connect();
-                    Log.w(TAG, "Device connected with reflect method");
-                    outputStream = bts.getOutputStream();
-                    handler.post(onclick);
-                    progressDialog.dismiss();
-                }
-            } catch (NoSuchMethodException e1) {
-                Log.w(TAG, e1.toString());
-            } catch (InvocationTargetException e1) {
-                Log.w(TAG, e1.toString());
-            } catch (IllegalAccessException e1) {
-                Log.w(TAG, e1.toString());
+                mediaPlayer.reset();
+                mediaPlayer.setDataSource("/sdcard/Download/power_off.mp3");
+                mediaPlayer.prepare();
+                mediaPlayer.start();
             } catch (IOException e1) {
-                Log.w(TAG, "reflect method failed, shut down process");
-//                runToastOnUIThread("Device not found");
+                Log.w(TAG,"???");
             }
+            progressDialog.dismiss();
+//            try {
+//                Log.w(TAG, "standard method failed, trying with reflect method......");
+//                if (!bts.isConnected()) {
+//                    Method m = btd.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
+//                    bts = (BluetoothSocket) m.invoke(btd, 1);
+//                    bts.connect();
+//                    Log.w(TAG, "Device connected with reflect method");
+//                    outputStream = bts.getOutputStream();
+//                    handler.post(onclick);
+//                    progressDialog.dismiss();
+//                }
+//            } catch (NoSuchMethodException e1) {
+//                progressDialog.dismiss();
+//                Log.w(TAG, e1.toString());
+//            } catch (InvocationTargetException e1) {
+//                progressDialog.dismiss();
+//                Log.w(TAG, e1.toString());
+//            } catch (IllegalAccessException e1) {
+//                progressDialog.dismiss();
+//                Log.w(TAG, e1.toString());
+//            } catch (IOException e1) {
+//                progressDialog.dismiss();
+//                Log.w(TAG, "reflect method failed, shut down process");
+//                runToastOnUIThread("Device not found");
+//            }
         }
     }
 

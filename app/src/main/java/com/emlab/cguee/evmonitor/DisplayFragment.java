@@ -102,8 +102,11 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private boolean isOpen = false;
     private boolean stopWorker = false;
     private byte[] input;
-    private double soc, vol, cur, ac, spe;
+    private double soc, vol, cur, ac, spe = 0;
     private int dnrInt;
+    private boolean isLower = false;
+    private boolean isPlaying = false;
+    private boolean isLow = false;
 
     private MediaPlayer mediaPlayer;
 
@@ -341,20 +344,37 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                             }
                                                         }
                                                         if (soc <= 100 && soc >= 0) {
+                                                            if(soc <= 40 && !isLow){
+                                                                isLow = true;
+                                                                Thread detectLow = new Thread(lowB);
+                                                                detectLow.start();
+                                                            }
                                                             batteryPercent.setText((int) soc + "%");
                                                             if (soc >= 85) {
                                                                 batteryImage.setImageResource(R.drawable.b04);
                                                             } else if (soc >= 60 && soc < 85) {
                                                                 batteryImage.setImageResource(R.drawable.b03);
                                                             } else if (soc >= 30 && soc < 60) {
+                                                                if(soc < 50 && soc > 40){
+                                                                    if(isLower == false) {
+                                                                        Thread detectLower = new Thread(lower50);
+                                                                        detectLower.start();
+                                                                        isLower = true;
+                                                                    }
+                                                                }
                                                                 batteryImage.setImageResource(R.drawable.b02);
+
                                                             } else if (soc >= 0 && soc < 30) {
                                                                 batteryImage.setImageResource(R.drawable.b01);
+
                                                             }
                                                         }
                                                         if (spe < 17 && spe >= 0 && ac <= 10 && ac >= 0) {
                                                             if (spe - speedDetect < 10 && spe - speedDetect > -10) {
                                                                 speedDetect = spe;
+                                                                if(ac == 0){
+                                                                    speedDetect = 0;
+                                                                }
                                                                 speedStr = new SpannableString((int) spe + " km/hr");
                                                                 speedStr.setSpan(new RelativeSizeSpan(4f), 0, String.valueOf(spe).length() - 1, 0);
                                                                 speedStr.setSpan(new ForegroundColorSpan(Color.RED), 0, String.valueOf(spe).length() - 1, 0);
@@ -529,15 +549,19 @@ public class DisplayFragment extends Fragment implements LocationListener {
         @Override
         public void run() {
             while(true){
-                if(spe > 13 && spe <= 16){
-                    handler.post(warning);
-                    handler.postDelayed(overS,1000);
+                if(speedDetect > 13 && speedDetect <= 16){
+                    if(!isPlaying) {
+                        isPlaying = true;
+                        handler.post(warning);
+                        handler.postDelayed(overS, 1000);
+                        try {
+                            Thread.sleep(12000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+
             }
         }
     };
@@ -546,15 +570,20 @@ public class DisplayFragment extends Fragment implements LocationListener {
         @Override
         public void run() {
             try {
+                Thread.sleep(1000);
+                mediaPlayer.reset();
+                mediaPlayer.setDataSource("/sdcard/Download/warning.mp3");
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                Thread.sleep(750);
                 mediaPlayer.reset();
                 mediaPlayer.setDataSource("/sdcard/Download/low_battery.mp3");
                 mediaPlayer.prepare();
                 mediaPlayer.start();
-                if(soc < 10) {
-                    handler.postDelayed(lowB, 180000);
-                }
             } catch (IOException e) {
                 e.toString();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     };
@@ -581,11 +610,30 @@ public class DisplayFragment extends Fragment implements LocationListener {
                 mediaPlayer.setDataSource("/sdcard/Download/slow_down.mp3");
                 mediaPlayer.prepare();
                 mediaPlayer.start();
-                if(spe >= 14 && spe <17){
-                    handler.postDelayed(overS,5000);
-                }
+                isPlaying = false;
             } catch (IOException e) {
                 Log.w(TAG,e.toString());
+            }
+        }
+    };
+
+    private Runnable lower50 = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if(soc < 50) {
+                try {
+                    mediaPlayer.reset();
+                    mediaPlayer.setDataSource("/sdcard/Download/low50.mp3");
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                } catch (IOException e) {
+                    Log.w(TAG, e.toString());
+                }
             }
         }
     };
