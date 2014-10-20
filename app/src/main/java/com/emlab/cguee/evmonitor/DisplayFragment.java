@@ -104,9 +104,11 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private byte[] input;
     private double soc, vol, cur, ac, spe = 0;
     private int dnrInt;
+    private double prevSoc;
     private boolean isLower = false;
     private boolean isPlaying = false;
     private boolean isLow = false;
+    private boolean isPrev = true;
 
     private MediaPlayer mediaPlayer;
 
@@ -316,6 +318,10 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                             if (input[0] == HEADER_SIGNAL) {
                                                 Log.w(TAG, "Header confirmed");
                                                 soc = input[1];
+                                                if(isPrev){
+                                                    prevSoc = soc;
+                                                    isPrev = false;
+                                                }
                                                 vol = ((double) input[2] + ((double) input[3] / 10));
                                                 cur = ((double) input[4] + ((double) input[5] / 10));
                                                 ac = input[6];
@@ -344,26 +350,31 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                             }
                                                         }
                                                         if (soc <= 100 && soc >= 0) {
-                                                            batteryPercent.setText((int) soc + "%");
-                                                            if (soc >= 85) {
-                                                                batteryImage.setImageResource(R.drawable.b04);
-                                                            } else if (soc >= 60 && soc < 85) {
-                                                                batteryImage.setImageResource(R.drawable.b03);
-                                                            } else if (soc >= 30 && soc < 60) {
-                                                                if(soc <= 50 && soc > 10){
-                                                                    if(isLower == false) {
-                                                                        Thread detectLower = new Thread(lower50);
-                                                                        detectLower.start();
-                                                                        isLower = true;
+                                                            if(soc - prevSoc <= -10){
+
+                                                            } else {
+                                                                prevSoc = soc;
+                                                                batteryPercent.setText((int) soc + "%");
+                                                                if (soc >= 85) {
+                                                                    batteryImage.setImageResource(R.drawable.b04);
+                                                                } else if (soc >= 60 && soc < 85) {
+                                                                    batteryImage.setImageResource(R.drawable.b03);
+                                                                } else if (soc >= 30 && soc < 60) {
+                                                                    if (soc <= 50 && soc > 10) {
+                                                                        if (isLower == false) {
+                                                                            Thread detectLower = new Thread(lower50);
+                                                                            detectLower.start();
+                                                                            isLower = true;
+                                                                        }
                                                                     }
-                                                                }
-                                                                batteryImage.setImageResource(R.drawable.b02);
-                                                            } else if (soc >= 0 && soc < 30) {
-                                                                batteryImage.setImageResource(R.drawable.b01);
-                                                                if(soc <= 10 && !isLow){
-                                                                    isLow = true;
-                                                                    Thread detectLow = new Thread(lowB);
-                                                                    detectLow.start();
+                                                                    batteryImage.setImageResource(R.drawable.b02);
+                                                                } else if (soc >= 0 && soc < 30) {
+                                                                    batteryImage.setImageResource(R.drawable.b01);
+                                                                    if (soc <= 10 && !isLow) {
+                                                                        isLow = true;
+                                                                        Thread detectLow = new Thread(lowB);
+                                                                        detectLow.start();
+                                                                    }
                                                                 }
                                                             }
                                                         }
