@@ -312,7 +312,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                         openBT();
                                     }
                                     try {
-                                        while(inputStream.available() >= 10) {
+                                        if(inputStream.available() >= 10) {
                                             input = new byte[10];
                                             inputStream.read(input);
                                             if (input[0] == HEADER_SIGNAL) {
