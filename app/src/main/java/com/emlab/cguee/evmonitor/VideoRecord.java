@@ -43,6 +43,7 @@ public class VideoRecord {
             mrec.stop();
             mrec.reset();
             mCamera.lock();
+            isRecording = false;
         }
     }
 

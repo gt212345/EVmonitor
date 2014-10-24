@@ -378,7 +378,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                                 }
                                                             }
                                                         }
-                                                        if (spe < 17 && spe >= 0 && ac <= 10 && ac >= 0) {
+                                                        if (spe < 15 && spe >= 0 && ac <= 10 && ac >= 0) {
                                                             if (spe - speedDetect < 10 && spe - speedDetect > -10) {
                                                                 speedDetect = spe;
                                                                 if(ac == 0){
@@ -558,7 +558,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
         @Override
         public void run() {
             while(true){
-                if(speedDetect > 13 && speedDetect <= 16){
+                if(speedDetect > 12 && speedDetect <= 15){
                     if(!isPlaying) {
                         isPlaying = true;
                         handler.post(warning);
