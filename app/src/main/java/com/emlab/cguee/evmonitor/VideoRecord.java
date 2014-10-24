@@ -42,7 +42,6 @@ public class VideoRecord {
         if(isRecording) {
             mrec.stop();
             mrec.reset();
-            mrec.release();
             mCamera.lock();
         }
     }

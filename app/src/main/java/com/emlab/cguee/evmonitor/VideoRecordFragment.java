@@ -44,6 +44,8 @@ public class VideoRecordFragment extends Fragment implements SurfaceHolder.Callb
     private VideoRecord videoRecord;
     private boolean isNotRec = true;
 
+    private static final String TAG = "VideoRecordFragment";
+
     private OnFragmentInteractionListener mListener;
 
     /**
@@ -133,7 +135,7 @@ public class VideoRecordFragment extends Fragment implements SurfaceHolder.Callb
         try {
             mCamera.setPreviewDisplay(surfaceHoldert);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.w(TAG,e.toString());
         }
         mCamera.startPreview();
     }
