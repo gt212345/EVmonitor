@@ -32,6 +32,7 @@ public class VideoRecord {
         mrec.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mrec.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mrec.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
+        mrec.setVideoFrameRate(30);
         mrec.setVideoSize(800,600);
         mrec.setOutputFile("/sdcard/"+filename+".mp4");
         mrec.prepare();
