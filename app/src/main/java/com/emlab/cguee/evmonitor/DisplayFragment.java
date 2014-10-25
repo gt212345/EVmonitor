@@ -70,7 +70,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private static final int HEADER_SIGNAL = 111;
     private ImageView batteryImage,cgu,dnr,radio,navigation;
     private TextView speed, batteryPercent, voltage, current;
-    private float header;
 
     private double speedDetect;
 
@@ -93,22 +92,26 @@ public class DisplayFragment extends Fragment implements LocationListener {
 
     private ProgressDialog progressDialog;
     private Thread BTThread, ListThread;
+
+    //Bluetooth stuff
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothDevice btd;
     private BluetoothSocket bts;
     private InputStream inputStream;
-    private OutputStream outputStream;
+    private OutputStream outputStream;//for future use
+
     private boolean isFind = false;
     private boolean isOpen = false;
     private boolean stopWorker = false;
-    private byte[] input;
-    private double soc, vol, cur, ac, spe = 0;
-    private int dnrInt;
-    private double prevSoc;
     private boolean isLower = false;
     private boolean isPlaying = false;
     private boolean isLow = false;
     private boolean isPrev = true;
+
+    private byte[] input;
+    private double soc, vol, cur, ac, spe = 0;
+    private int dnrInt;
+    private double prevSoc;
 
     private MediaPlayer mediaPlayer;
 
@@ -303,14 +306,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
                             public void run() {
                                 while (!Thread.currentThread().isInterrupted()
                                         && !stopWorker) {
-//                                    try {
-//                                        outputStream.write(1);
-//                                    } catch (IOException e) {
-//                                        e.toString();
-//                                    }
-                                    if(!bts.isConnected()){
-                                        openBT();
-                                    }
                                     try {
                                         if(inputStream.available() >= 10) {
                                             input = new byte[10];
