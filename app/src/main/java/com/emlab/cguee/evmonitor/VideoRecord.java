@@ -27,11 +27,13 @@ public class VideoRecord {
     public void startEncoding() throws IOException {
         isRecording = true;
         mrec.setCamera(mCamera);
+        mCamera.stopPreview();
         mCamera.unlock();
         mrec.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mrec.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mrec.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
-        mrec.setVideoSize(320,240);
+        mrec.setVideoFrameRate(30);
+        mrec.setVideoSize(800,600);
         mrec.setOutputFile("/sdcard/"+filename+".mp4");
         mrec.prepare();
         mrec.start();
@@ -41,7 +43,8 @@ public class VideoRecord {
         if(isRecording) {
             mrec.stop();
             mrec.reset();
-            mrec.release();
+            mCamera.lock();
+            isRecording = false;
         }
     }
 

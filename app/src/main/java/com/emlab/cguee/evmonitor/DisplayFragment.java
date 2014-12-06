@@ -70,7 +70,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private static final int HEADER_SIGNAL = 111;
     private ImageView batteryImage,cgu,dnr,radio,navigation;
     private TextView speed, batteryPercent, voltage, current;
-    private float header;
 
     private double speedDetect;
 
@@ -93,22 +92,26 @@ public class DisplayFragment extends Fragment implements LocationListener {
 
     private ProgressDialog progressDialog;
     private Thread BTThread, ListThread;
+
+    //Bluetooth stuff
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothDevice btd;
     private BluetoothSocket bts;
     private InputStream inputStream;
-    private OutputStream outputStream;
+    private OutputStream outputStream;//for future use
+
     private boolean isFind = false;
     private boolean isOpen = false;
     private boolean stopWorker = false;
-    private byte[] input;
-    private double soc, vol, cur, ac, spe = 0;
-    private int dnrInt;
-    private double prevSoc;
     private boolean isLower = false;
     private boolean isPlaying = false;
     private boolean isLow = false;
     private boolean isPrev = true;
+
+    private byte[] input;
+    private double soc, vol, cur, ac, spe = 0;
+    private int dnrInt;
+    private double prevSoc;
 
     private MediaPlayer mediaPlayer;
 
@@ -303,16 +306,8 @@ public class DisplayFragment extends Fragment implements LocationListener {
                             public void run() {
                                 while (!Thread.currentThread().isInterrupted()
                                         && !stopWorker) {
-//                                    try {
-//                                        outputStream.write(1);
-//                                    } catch (IOException e) {
-//                                        e.toString();
-//                                    }
-                                    if(!bts.isConnected()){
-                                        openBT();
-                                    }
                                     try {
-                                        while(inputStream.available() >= 10) {
+                                        if(inputStream.available() >= 10) {
                                             input = new byte[10];
                                             inputStream.read(input);
                                             if (input[0] == HEADER_SIGNAL) {
@@ -378,7 +373,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
                                                                 }
                                                             }
                                                         }
-                                                        if (spe < 17 && spe >= 0 && ac <= 10 && ac >= 0) {
+                                                        if (spe < 15 && spe >= 0 && ac <= 10 && ac >= 0) {
                                                             if (spe - speedDetect < 10 && spe - speedDetect > -10) {
                                                                 speedDetect = spe;
                                                                 if(ac == 0){
@@ -558,7 +553,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
         @Override
         public void run() {
             while(true){
-                if(speedDetect > 13 && speedDetect <= 16){
+                if(speedDetect > 12 && speedDetect <= 15){
                     if(!isPlaying) {
                         isPlaying = true;
                         handler.post(warning);

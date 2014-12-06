@@ -6,6 +6,8 @@ import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -42,6 +45,11 @@ public class VideoRecordFragment extends Fragment implements SurfaceHolder.Callb
     private TextView record;
     private VideoRecord videoRecord;
     private boolean isNotRec = true;
+
+    private Handler handler;
+    private HandlerThread handlerThread;
+
+    private static final String TAG = "VideoRecordFragment";
 
     private OnFragmentInteractionListener mListener;
 
@@ -73,6 +81,9 @@ public class VideoRecordFragment extends Fragment implements SurfaceHolder.Callb
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        handlerThread = new HandlerThread("");
+        handlerThread.start();
+        handler = new Handler(handlerThread.getLooper());
     }
 
     @Override
@@ -132,7 +143,7 @@ public class VideoRecordFragment extends Fragment implements SurfaceHolder.Callb
         try {
             mCamera.setPreviewDisplay(surfaceHoldert);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.w(TAG,e.toString());
         }
         mCamera.startPreview();
     }
@@ -169,16 +180,17 @@ public class VideoRecordFragment extends Fragment implements SurfaceHolder.Callb
         @Override
         public void onClick(View view) {
             if (isNotRec) {
-                Toast.makeText(getActivity(), "Record Start", Toast.LENGTH_SHORT).show();
                 isNotRec = false;
+                handler.post(recordAnimUp);
+                Toast.makeText(getActivity(), "Record Start", Toast.LENGTH_SHORT).show();
                 try {
                     videoRecord.startEncoding();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } else {
-                Toast.makeText(getActivity(), "Record Stop", Toast.LENGTH_SHORT).show();
                 isNotRec = true;
+                Toast.makeText(getActivity(), "Record Stop", Toast.LENGTH_SHORT).show();
                 videoRecord.stopEncoding();
             }
         }
@@ -217,5 +229,33 @@ public class VideoRecordFragment extends Fragment implements SurfaceHolder.Callb
         }
         return cam;
     }
+
+    private Runnable recordAnimUp = new Runnable() {
+        @Override
+        public void run() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    record.setText("REC");
+                }
+            });
+            handler.postDelayed(recordAnimNon, 500);
+        }
+    };
+
+    private Runnable recordAnimNon = new Runnable() {
+        @Override
+        public void run() {
+            if(!isNotRec) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        record.setText("");
+                    }
+                });
+            }
+            handler.postDelayed(recordAnimUp, 500);
+        }
+    };
 
 }

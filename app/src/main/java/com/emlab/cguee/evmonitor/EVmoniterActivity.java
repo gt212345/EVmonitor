@@ -24,7 +24,6 @@ public class EVmoniterActivity extends FragmentActivity implements SurfaceHolder
             .beginTransaction();
 
     SectionsPagerAdapter mSectionsPagerAdapter;
-    public static FragmentManager fragmentManager;
 
     /**
      * The {@link ViewPager} that will host the section contents.
