@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -53,6 +54,7 @@ import java.util.Set;
 import java.util.UUID;
 
 
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -68,7 +70,7 @@ public class DisplayFragment extends Fragment implements LocationListener {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final int HEADER_SIGNAL = 111;
-    private ImageView batteryImage,cgu,dnr,radio,navigation;
+    private ImageView batteryImage,dnr,radio,navigation;
     private TextView speed, batteryPercent, voltage, current;
 
     private double speedDetect;
@@ -140,10 +142,10 @@ public class DisplayFragment extends Fragment implements LocationListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        locationManager = (LocationManager) getActivity().getSystemService(getActivity().LOCATION_SERVICE);
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         Log.w(TAG, "LocationManager initialized");
 //        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0,this);
-        myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+//        myLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         Log.w(TAG, "Current location request sent");
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Log.w(TAG, "BluetoothAdapter initialized");
@@ -229,7 +231,6 @@ public class DisplayFragment extends Fragment implements LocationListener {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        cgu = (ImageView) getView().findViewById(R.id.cgu);
         navigation = (ImageView) getView().findViewById(R.id.navigation);
         radio = (ImageView) getView().findViewById(R.id.radio);
         dnr = (ImageView) getView().findViewById(R.id.dnr);

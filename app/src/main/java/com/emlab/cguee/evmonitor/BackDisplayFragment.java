@@ -91,7 +91,11 @@ public class BackDisplayFragment extends Fragment implements SurfaceHolder.Callb
         }).start();
     }
     public void VideoCodecInit() {
-        mediaCodec = MediaCodec.createDecoderByType("video/avc");
+        try {
+            mediaCodec = MediaCodec.createDecoderByType("video/avc");
+        } catch (IOException e) {
+            Log.w(TAG,"createDecoderByType failed");
+        }
         MediaFormat mediaFormat = MediaFormat.createVideoFormat("video/avc", 1280, 720);
         mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, 2500000);
         mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 20);
